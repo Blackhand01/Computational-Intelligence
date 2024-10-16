@@ -1,0 +1,24 @@
+# Ignora l'ambiente virtuale
+laboratory/labenv/
+
+# Ignora i file markdown dei report
+docs/report.md
+
+# Ignora i file all'interno delle directory specifiche dei laboratori
+laboratory/labs/CI2024_lab0/
+laboratory/labs/CI2024_lab1/
+laboratory/labs/computational-intelligence/
+
+
+# Ignora i file di output di Python
+*.pyc
+__pycache__/
+
+# Ignora i file di configurazione locali
+.vscode/
+.idea/
+
+# Ignora file e cartelle di backup o temporanei
+*.bak
+*.swp
+.DS_Store
