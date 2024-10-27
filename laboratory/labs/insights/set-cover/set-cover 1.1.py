@@ -12,9 +12,6 @@
 from itertools import accumulate
 import numpy as np
 from matplotlib import pyplot as plt
-
-
-
 from icecream import ic
 
 # %% [markdown]
