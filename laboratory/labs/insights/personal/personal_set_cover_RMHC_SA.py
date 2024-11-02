@@ -133,7 +133,7 @@ def plot_fitness_evolution(history, instance_index, algorithm):
     plt.xlabel("Steps")
     plt.ylabel("Fitness")
     plt.legend()
-    plt.savefig(f"img/plot_{algorithm}_instance_{instance_index}.png")
+    plt.savefig(f"img/set_cover/plot_{algorithm}_instance_{instance_index}.png")
     plt.close()
 
 def main():
