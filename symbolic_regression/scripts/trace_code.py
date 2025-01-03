@@ -38,7 +38,7 @@ def collect_code_to_file(directory, output_file):
     Raccoglie codice rilevante dai file nel repository e lo salva in un file di output.
     """
     # Escludi file e directory irrilevanti
-    exclude_files = {'.DS_Store', '.gitignore','data',}
+    exclude_files = {'.DS_Store', '.gitignore','data', 'scripts'}
     exclude_dirs = {'.pytest_cache', '__pycache__', '.venv', 'node_modules', 'dist', 'build', 'docs/_build', '.git', 'history.csv',
                     'symbolic_regression/scripts/trace_code.py'}
 

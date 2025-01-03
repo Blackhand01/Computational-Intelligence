@@ -1,7 +1,11 @@
 Repository Structure:
 symbolic_regression/
+  requirements.txt
+  README.md
   results/
+    s333971.py
     logs/
+      execution.log
     graphs/
   scripts/
     trace_code.py
@@ -9,19 +13,28 @@ symbolic_regression/
   venv/
     pyvenv.cfg
     bin/
-      pip3.9
+      pyftsubset
       Activate.ps1
       python3
+      ttx
       python
       pip3
       activate.fish
-      python3.9
+      fonttools
+      python3.11
+      f2py
       pip
+      pip3.11
       activate
+      numpy-config
+      pyftmerge
       activate.csh
     include/
+      python3.11/
     lib/
-      python3.9/
+      python3.11/
+    share/
+      man/
   data/
     problem_8.npz
     problem_0.npz
@@ -36,7 +49,18 @@ symbolic_regression/
     report.md
     graphs/
   src/
-    s333971.py
+    gxgp_wrapper.py
+    data_loader.py
+    report_generator.py
+    generate_graphs.py
+    evaluate.py
+    main.py
+    __pycache__/
+      evaluate.cpython-311.pyc
+      report_generator.cpython-311.pyc
+      gxgp_wrapper.cpython-311.pyc
+      data_loader.cpython-311.pyc
+      generate_graphs.cpython-311.pyc
     gxgp/
       gp_tree.py
       __init__.py
@@ -46,21 +70,131 @@ symbolic_regression/
       node.py
       draw.py
       gp_dag.py
+      __pycache__/
+        draw.cpython-311.pyc
+        gp_tree.cpython-311.pyc
+        utils.cpython-311.pyc
+        random.cpython-311.pyc
+        gp_dag.cpython-311.pyc
+        node.cpython-311.pyc
+        gp_common.cpython-311.pyc
+        __init__.cpython-311.pyc
 """
 
 Repository Code Collection
 
-# File: s333971.py
-# Number of Lines: 9
-# Copyright © 2024 Giovanni Squillero <giovanni.squillero@polito.it>
-# https://github.com/squillero/computational-intelligence
-# Free under certain conditions — see the license for details.
+# File: gxgp_wrapper.py
+# Number of Lines: 17
+from gxgp.node import Node
+from gxgp.gp_dag import DagGP
 
+def train_model(x_train, y_train):
+    """Addestra un modello con GXGP"""
+    operators = [lambda x, y: x + y, lambda x, y: x * y]
+    variables = [f'x{i}' for i in range(x_train.shape[0])]
+    gp = DagGP(operators, variables, constants=3)
+    return gp.create_individual()
+
+def evaluate_model(model, x, y):
+    """Valuta il modello su un dataset"""
+    return DagGP.mse(model, x.T, y)
+
+def draw_model(model, output_file):
+    """Disegna l'albero del modello"""
+    model.draw(output_file)
+
+
+# File: data_loader.py
+# Number of Lines: 8
 import numpy as np
 
+def load_data(file_path):
+    """Carica i dati dal file .npz"""
+    data = np.load(file_path)
+    x, y = data['x'], data['y']
+    train_size = int(0.8 * x.shape[1])
+    return x[:, :train_size], y[:train_size], x[:, train_size:], y[train_size:]
 
-def f(x: np.ndarray) -> np.ndarray:
-    return x[0] + x[1] / 5
+
+# File: report_generator.py
+# Number of Lines: 11
+def update_report(mse_train, mse_test, graphs_dir):
+    """Aggiorna il report Markdown"""
+    report_path = "reports/report.md"
+    with open(report_path, "w") as f:
+        f.write(f"# Regressione Simbolica\n")
+        f.write(f"## Risultati\n")
+        f.write(f"- MSE Training: {mse_train}\n")
+        f.write(f"- MSE Test: {mse_test}\n")
+        f.write(f"## Grafici\n")
+        f.write(f"![Model Structure]({graphs_dir}/model_structure.png)\n")
+        f.write(f"![Predicted vs Actual]({graphs_dir}/predicted_vs_actual.png)\n")
+
+
+# File: generate_graphs.py
+# Number of Lines: 13
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_results(model, x, y, output_dir):
+    """Genera grafici di output"""
+    y_pred = model(x=x.T)
+    plt.figure()
+    plt.scatter(y, y_pred, alpha=0.6, label="Predicted vs Actual")
+    plt.xlabel("Actual")
+    plt.ylabel("Predicted")
+    plt.legend()
+    plt.savefig(f"{output_dir}/predicted_vs_actual.png")
+    plt.close()
+
+
+# File: evaluate.py
+# Number of Lines: 6
+from gxgp.gp_dag import DagGP
+
+def calculate_mse(model, x, y):
+    """Calcola il Mean Squared Error"""
+    y_pred = DagGP.evaluate(model, x.T)
+    return sum((y - y_pred) ** 2) / len(y)
+
+
+# File: main.py
+# Number of Lines: 35
+import os
+from data_loader import load_data
+from gxgp_wrapper import train_model, evaluate_model, draw_model
+from evaluate import calculate_mse
+from generate_graphs import plot_results
+from report_generator import update_report
+import logging
+
+# Configurazione logging
+logging.basicConfig(filename='results/logs/execution.log', level=logging.INFO)
+
+def main():
+    # 1. Caricamento dei dati
+    data_file = "data/problem_0.npz"
+    x_train, y_train, x_test, y_test = load_data(data_file)
+
+    # 2. Addestramento del modello
+    model = train_model(x_train, y_train)
+
+    # 3. Valutazione del modello
+    mse_train = calculate_mse(model, x_train, y_train)
+    mse_test = calculate_mse(model, x_test, y_test)
+    logging.info(f"MSE Training: {mse_train}, MSE Test: {mse_test}")
+
+    # 4. Generazione dei grafici
+    plot_results(model, x_test, y_test, output_dir="results/graphs")
+
+    # 5. Disegno dell'albero
+    draw_model(model, output_file="results/graphs/model_structure.png")
+
+    # 6. Aggiornamento del report
+    update_report(mse_train, mse_test, "results/graphs/")
+
+if __name__ == "__main__":
+    main()
 
 
 # File: gxgp/gp_tree.py
