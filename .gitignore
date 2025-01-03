@@ -27,3 +27,5 @@ __pycache__/
 .DS_Store
 # Ignora i file di configurazione ambiente
 .env
+symbolic_regression/scripts/trace_code.py
+symbolic_regression/venv

@@ -38,7 +38,7 @@ def collect_code_to_file(directory, output_file):
     Raccoglie codice rilevante dai file nel repository e lo salva in un file di output.
     """
     # Escludi file e directory irrilevanti
-    exclude_files = {'.DS_Store', '.gitignore', 'LICENSE.md', 'BestPractices.md', 'README.md', 'symbolic_regression/data',}
+    exclude_files = {'.DS_Store', '.gitignore','data',}
     exclude_dirs = {'.pytest_cache', '__pycache__', '.venv', 'node_modules', 'dist', 'build', 'docs/_build', '.git', 'history.csv',
                     'symbolic_regression/scripts/trace_code.py'}
 
@@ -79,11 +79,12 @@ def collect_code_to_file(directory, output_file):
 
 if __name__ == "__main__":
     # Configura la directory del repository e il file di output
-    repository_path = "/Users/stefanobisignano/Desktop/P_CI/symbolic_regression"
-    output_file_path = "/Users/stefanobisignano/Desktop/P_CI/symbolic_regression/utility/collected_code.txt"
+    repository_path_structure = "/Users/stefanoroybisignano/Desktop/P_CI/symbolic_regression"
+    repository_path = "/Users/stefanoroybisignano/Desktop/P_CI/symbolic_regression/src"
+    output_file_path = "/Users/stefanoroybisignano/Desktop/P_CI/symbolic_regression/scripts/collected_code.txt"
 
     # Stampa la struttura del repository e salva nel file di output
-    print_repository_structure(repository_path, max_depth=2, output_file=output_file_path)
+    print_repository_structure(repository_path_structure, max_depth=4, output_file=output_file_path)
 
     # Raccogli il codice e salva nel file di output
     collect_code_to_file(repository_path, output_file_path)
