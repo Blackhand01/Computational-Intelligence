@@ -29,3 +29,4 @@ __pycache__/
 .env
 symbolic_regression/venv
 symbolic_regression/scripts/collected_code.txt
+symbolic_regression/scripts/trace_code.py
