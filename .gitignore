@@ -1,6 +1,6 @@
 # Ignora l'ambiente virtuale
 laboratory/labenv/
-
+theory/
 # Ignora i file markdown dei report
 docs/report.md
 
