@@ -1,0 +1,835 @@
+Repository Structure:
+project_template/
+  symreg.ipynb
+  symreg_user.ipynb
+  d3584.py
+  demo-gxgp.ipynb
+  gxgp/
+    gp_tree.py
+    __init__.py
+    random.py
+    gp_common.py
+    utils.py
+    node.py
+    draw.py
+    gp_dag.py
+  utility/
+    trace_code.py
+    collected_code.txt
+"""
+
+Repository Code Collection
+
+# File: symreg.ipynb
+# Number of Lines: 143
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Copyright **`(c)`** 2024 Giovanni Squillero `<giovanni.squillero@polito.it>`  \n",
+    "[`https://github.com/squillero/computational-intelligence`](https://github.com/squillero/computational-intelligence)  \n",
+    "Free under certain conditions — see the [`license`](https://github.com/squillero/computational-intelligence/blob/master/LICENSE.md) for details.  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "from icecream import ic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def true_f(x: np.ndarray) -> np.ndarray:\n",
+    "    return x[0] + np.sin(x[1]) / 5"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "TEST_SIZE = 10_000\n",
+    "TRAIN_SIZE = 1000\n",
+    "\n",
+    "x_validation = np.vstack(\n",
+    "    [\n",
+    "        np.random.random_sample(size=TEST_SIZE) * 2 * np.pi - np.pi,\n",
+    "        np.random.random_sample(size=TEST_SIZE) * 2 - 1,\n",
+    "    ]\n",
+    ")\n",
+    "y_validation = true_f(x_validation)\n",
+    "train_indexes = np.random.choice(TEST_SIZE, size=TRAIN_SIZE, replace=False)\n",
+    "x_train = x_validation[:, train_indexes]\n",
+    "y_train = y_validation[train_indexes]\n",
+    "assert np.all(y_train == true_f(x_train)), \"D'ho\"\n",
+    "\n",
+    "np.savez('problem_0.npz', x=x_train, y=y_train)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import d3584"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(2, 1000)"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "problem = np.load('problem_0.npz')\n",
+    "x = problem['x']\n",
+    "y = problem['y']\n",
+    "x.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "MSE (train): 0.0151147\n",
+      "MSE (real) : 0.0145592\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f\"MSE (train): {100*np.square(y_train-d3584.f(x_train)).sum()/len(y_train):g}\")\n",
+    "print(f\"MSE (real) : {100*np.square(y_validation-d3584.f(x_validation)).sum()/len(y_validation):g}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "ci-staff-mErg2TPS-py3.13",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
+
+
+# File: symreg_user.ipynb
+# Number of Lines: 74
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Copyright **`(c)`** 2024 Giovanni Squillero `<giovanni.squillero@polito.it>`  \n",
+    "[`https://github.com/squillero/computational-intelligence`](https://github.com/squillero/computational-intelligence)  \n",
+    "Free under certain conditions — see the [`license`](https://github.com/squillero/computational-intelligence/blob/master/LICENSE.md) for details.  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "from icecream import ic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(2, 1000)"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "problem = np.load('problem_0.npz')\n",
+    "x = problem['x']\n",
+    "y = problem['y']\n",
+    "x.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "ci-staff-mErg2TPS-py3.13",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
+
+
+# File: d3584.py
+# Number of Lines: 9
+# Copyright © 2024 Giovanni Squillero <giovanni.squillero@polito.it>
+# https://github.com/squillero/computational-intelligence
+# Free under certain conditions — see the license for details.
+
+import numpy as np
+
+
+def f(x: np.ndarray) -> np.ndarray:
+    return x[0] + x[1] / 5
+
+
+# File: demo-gxgp.ipynb
+# Number of Lines: 203
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "7439d4f36df0ed9f",
+   "metadata": {},
+   "source": [
+    "**[GxGP](https://github.com/squillero/gxgp)** — *A no-nonsense GP in pure Python*  \n",
+    "`https://github.com/squillero/gxgp`  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "initial_id",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:25.200213Z",
+     "start_time": "2024-07-23T08:49:25.196664Z"
+    },
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import operator\n",
+    "import numpy as np\n",
+    "\n",
+    "from icecream import ic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "f87450767cabf48e",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:25.967332Z",
+     "start_time": "2024-07-23T08:49:25.201766Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "...",
+      "text/plain": [
+       "<Figure size 640x480 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "from gxgp import Node\n",
+    "\n",
+    "tree = Node(np.multiply, [Node(np.add, [Node(10), Node('x')]), Node(2)])\n",
+    "tree.draw()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "424658f26564b400",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:25.971899Z",
+     "start_time": "2024-07-23T08:49:25.968253Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([22, 24, 26, 28, 30])"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "tree(x=np.array([1, 2, 3, 4, 5]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3fcf9c84d3f96002",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:26.130868Z",
+     "start_time": "2024-07-23T08:49:25.972729Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "tree()  # Error: missing 'x'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "925f2a6ecdf1751a",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:30.084627Z",
+     "start_time": "2024-07-23T08:49:29.807827Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "tree2 = Node(\n",
+    "    lambda a, b, c, d, e: (a + b * c - d) / e, [Node('x'), Node('y'), Node(3), Node('z'), Node(2)]\n",
+    ")\n",
+    "tree2.draw()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e7cd6c0c5c309fba",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:30.779650Z",
+     "start_time": "2024-07-23T08:49:30.775019Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Explicit keyword arguments (unused arguments are ignored)\n",
+    "tree2(x=1, y=2, z=3, foo=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d3f931fffe96a9d6",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2024-07-23T08:49:31.732304Z",
+     "start_time": "2024-07-23T08:49:31.727653Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Unpacking a dictionary\n",
+    "vars = {'x': 1, 'y': 2, 'z': 3, 'foo': 42}\n",
+    "tree2(**vars)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "200e4198",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'multiply(add(10, x), 2)'"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "str(tree)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "446b465f",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "ci-WEKR9SVn-py3.12",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
+
+
+# File: gxgp/gp_tree.py
+# Number of Lines: 18
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+import random
+from typing import Collection
+
+from .node import Node
+from .utils import arity
+
+__all__ = ['TreeGP']
+
+
+class TreeGP:
+    def __init__(self, operators: Collection, variables: int | Collection, constants: int | Collection, *, seed=42):
+        raise NotImplementedError
+
+
+# File: gxgp/__init__.py
+# Number of Lines: 20
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+try:
+    from icecream import install
+
+    install()
+except ImportError:
+    pass
+
+from .draw import *
+from .gp_common import *
+from .gp_dag import *
+from .gp_tree import *
+from .node import *
+from .random import gxgp_random
+from .utils import *
+
+
+# File: gxgp/random.py
+# Number of Lines: 10
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+import random
+
+assert "gxgp_random" not in globals(), "Paranoia check: gxgp_random already initialized"
+gxgp_random = random.Random(42)
+
+
+# File: gxgp/gp_common.py
+# Number of Lines: 25
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+from copy import deepcopy
+
+from .node import Node
+from .random import gxgp_random
+
+
+def xover_swap_subtree(tree1: Node, tree2: Node) -> Node:
+    offspring = deepcopy(tree1)
+    ic(offspring)
+    successors = None
+    while not successors:
+        node = gxgp_random.choice(list(offspring.subtree))
+        successors = node.successors
+    i = gxgp_random.randrange(len(successors))
+    ic(successors, i)
+    successors[i] = deepcopy(gxgp_random.choice(list(tree2.subtree)))
+    ic(successors, i)
+    node.successors = successors
+    return offspring
+
+
+# File: gxgp/utils.py
+# Number of Lines: 18
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+import inspect
+from typing import Callable
+
+__all__ = ['arity']
+
+
+def arity(f: Callable) -> int:
+    """Return the number of expected parameter or None if variable"""
+    if inspect.getfullargspec(f).varargs is not None:
+        return None
+    else:
+        return len(inspect.getfullargspec(f).args)
+
+
+# File: gxgp/node.py
+# Number of Lines: 116
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+import numbers
+import warnings
+from typing import Callable
+
+from .draw import draw
+from .utils import arity
+
+__all__ = ['Node']
+
+
+class Node:
+    _func: Callable
+    _successors: tuple['Node']
+    _arity: int
+    _str: str
+
+    def __init__(self, node=None, successors=None, *, name=None):
+        if callable(node):
+
+            def _f(*_args, **_kwargs):
+                return node(*_args)
+
+            self._func = _f
+            self._successors = tuple(successors)
+            self._arity = arity(node)
+            assert self._arity is None or len(tuple(successors)) == self._arity, (
+                "Panic: Incorrect number of children."
+                + f" Expected {len(tuple(successors))} found {arity(node)}"
+            )
+            self._leaf = False
+            assert all(isinstance(s, Node) for s in successors), "Panic: Successors must be `Node`"
+            self._successors = tuple(successors)
+            if name is not None:
+                self._str = name
+            elif node.__name__ == '<lambda>':
+                self._str = 'λ'
+            else:
+                self._str = node.__name__
+        elif isinstance(node, numbers.Number):
+            self._func = eval(f'lambda **_kw: {node}')
+            self._successors = tuple()
+            self._arity = 0
+            self._str = f'{node:g}'
+        elif isinstance(node, str):
+            self._func = eval(f'lambda *, {node}, **_kw: {node}')
+            self._successors = tuple()
+            self._arity = 0
+            self._str = str(node)
+        else:
+            assert False
+
+    def __call__(self, **kwargs):
+        return self._func(*[c(**kwargs) for c in self._successors], **kwargs)
+
+    def __str__(self):
+        return self.long_name
+
+    def __len__(self):
+        return 1 + sum(len(c) for c in self._successors)
+
+    @property
+    def value(self):
+        return self()
+
+    @property
+    def arity(self):
+        return self._arity
+
+    @property
+    def successors(self):
+        return list(self._successors)
+
+    @successors.setter
+    def successors(self, new_successors):
+        assert len(new_successors) == len(self._successors)
+        self._successors = tuple(new_successors)
+
+    @property
+    def is_leaf(self):
+        return not self._successors
+
+    @property
+    def short_name(self):
+        return self._str
+
+    @property
+    def long_name(self):
+        if self.is_leaf:
+            return self.short_name
+        else:
+            return f'{self.short_name}(' + ', '.join(c.long_name for c in self._successors) + ')'
+
+    @property
+    def subtree(self):
+        result = set()
+        _get_subtree(result, self)
+        return result
+
+    def draw(self):
+        try:
+            return draw(self)
+        except Exception as msg:
+            warnings.warn(f"Drawing not available ({msg})", UserWarning, 2)
+            return None
+
+
+def _get_subtree(bunch: set, node: Node):
+    bunch.add(node)
+    for c in node._successors:
+        _get_subtree(bunch, c)
+
+
+# File: gxgp/draw.py
+# Number of Lines: 59
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+import inspect
+
+
+def draw(node: "Node"):
+    import networkx as nx
+    from networkx.drawing.nx_pydot import graphviz_layout
+
+    G = nx.DiGraph()
+    for n1 in list(node.subtree):
+        for n2 in list(n1._successors):
+            G.add_edge(id(n1), id(n2))
+
+    pos = graphviz_layout(G, prog="dot")  # dot neato twopi circo fdp sfdp
+    # plt.figure()
+    # plt.title(node.long_name)
+
+    nx.draw_networkx_nodes(
+        G,
+        nodelist=[id(n) for n in node.subtree if not
+        n.is_leaf],
+        pos=pos,
+        node_size=800,
+        node_color='lightpink',
+        node_shape='o'  # so^>v<dph8
+    )
+    nx.draw_networkx_nodes(
+        G,
+        nodelist=[id(n) for n in node.subtree if
+                  n.is_leaf and len(inspect.getfullargspec(n._func).kwonlyargs) == 1],
+        pos=pos,
+        node_size=500,
+        node_color='lightgreen',
+        node_shape='s'  # so^>v<dph8
+    )
+    nx.draw_networkx_nodes(
+        G,
+        nodelist=[id(n) for n in node.subtree if
+                  n.is_leaf and len(inspect.getfullargspec(n._func).kwonlyargs) == 0],
+        pos=pos,
+        node_size=500,
+        node_color='lightblue',
+        node_shape='s'  # so^>v<dph8
+    )
+    nx.draw_networkx_labels(
+        G,
+        pos=pos,
+        labels={id(n): n.short_name for n in node.subtree},
+    )
+    nx.draw_networkx_edges(
+        G,
+        pos=pos,
+        node_size=800,
+    )
+
+
+# File: gxgp/gp_dag.py
+# Number of Lines: 68
+#   *        Giovanni Squillero's GP Toolbox
+#  / \       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2   +      A no-nonsense GP in pure Python
+#    / \
+#  10   11   Distributed under MIT License
+
+from typing import Collection
+
+from .node import Node
+from .random import gxgp_random
+from .utils import arity
+
+__all__ = ['DagGP']
+
+
+class DagGP:
+    def __init__(self, operators: Collection, variables: int | Collection, constants: int | Collection):
+        self._operators = list(operators)
+        if isinstance(variables, int):
+            self._variables = [Node(DagGP.default_variable(i)) for i in range(variables)]
+        else:
+            self._variables = [Node(t) for t in variables]
+        if isinstance(constants, int):
+            self._constants = [Node(gxgp_random.random()) for i in range(constants)]
+        else:
+            self._constants = [Node(t) for t in constants]
+
+    def create_individual(self, n_nodes=7):
+        pool = self._variables * (1 + len(self._constants) // len(self._variables)) + self._constants
+        individual = None
+        while individual is None or len(individual) < n_nodes:
+            op = gxgp_random.choice(self._operators)
+            params = gxgp_random.choices(pool, k=arity(op))
+            individual = Node(op, params)
+            pool.append(individual)
+        return individual
+
+    @staticmethod
+    def default_variable(i: int) -> str:
+        return f'x{i}'
+
+    @staticmethod
+    def evaluate(individual: Node, X, variable_names=None):
+        if variable_names:
+            names = variable_names
+        else:
+            names = [DagGP.default_variable(i) for i in range(len(X[0]))]
+
+        y_pred = list()
+        for row in X:
+            y_pred.append(individual(**{n: v for n, v in zip(names, row)}))
+        return y_pred
+
+    @staticmethod
+    def plot_evaluate(individual: Node, X, variable_names=None):
+        import matplotlib.pyplot as plt
+
+        y_pred = DagGP.evaluate(individual, X, variable_names)
+        plt.figure()
+        plt.title(individual.long_name)
+        plt.scatter([x[0] for x in X], y_pred)
+
+        return y_pred
+
+    @staticmethod
+    def mse(individual: Node, X, y, variable_names=None):
+        y_pred = DagGP.evaluate(individual, X, variable_names)
+        return sum((a - b) ** 2 for a, b in zip(y, y_pred)) / len(y)
+
+
+"""
+

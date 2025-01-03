@@ -1,0 +1,1066 @@
+Repository Structure:
+CI2024_lab3-main/
+  custom_heuristics.py
+  requirements.txt
+  trace_code.py
+  collected_code.txt
+  puzzle.py
+  graph.py
+  priorityqueue.py
+  README.md
+  .gitignore
+  path_search.py
+  main.py
+  parameters_optimization.py
+  benchmarking.py
+  plots/
+    5x5.jpg
+    3x3.jpg
+    4x4.jpg
+"""
+
+Repository Code Collection
+
+# File: custom_heuristics.py
+# Number of Lines: 67
+import numpy as np
+
+from puzzle import Board
+
+
+def linear_conflicts(board: Board):
+    size = board.size
+    conflicts = 0
+
+    # Check for row conflicts
+    for row in range(size):
+        for col in range(size):
+            tile = board[row][col]
+            if tile == 0:
+                continue
+
+            # Check if the tile is in the correct row
+            if (tile - 1) // size == row:
+                for i in range(col + 1, size):
+                    other_tile = board[row][i]
+                    if other_tile == 0:
+                        continue
+                    if (other_tile - 1) // size == row and tile > other_tile:
+                        conflicts += 1
+
+            # Check if the tile is in the correct column
+            if tile % size == col - 1:
+                for i in range(row + 1, size):
+                    other_tile = board[i][col]
+                    if other_tile == 0:
+                        continue
+                    if other_tile % size == col and tile > other_tile:
+                        conflicts += 1
+
+    return conflicts
+
+
+def inversions(board: Board):
+    inversions = 0
+    for i in range(board.size):
+        for j in range(board.size):
+            if board[i][j] == 0:
+                continue
+            for k in range(i, board.size):
+                for l in range(j, board.size):
+                    if board[k][l] != 0 and board[i][j] > board[k][l]:
+                        inversions += 1
+    return inversions
+
+
+def improved_manhattan(board_size, weights=None):
+    solution = np.arange(board_size**2)
+    solution = np.roll(solution, -1).reshape(board_size, board_size)
+    solution = Board(solution)
+
+    if weights is None:
+        match board_size:
+            case 3:
+                weights = (0.15, 0.75, 0.10)
+            case _:
+                weights = (0.30, 0.55, 0.15)
+
+    return (
+        lambda board: board.manhattan_distance(solution) * weights[0]
+        + linear_conflicts(board) * weights[1]
+        + inversions(board) * weights[2]
+    )
+
+
+# File: requirements.txt
+# Number of Lines: 5
+numpy==1.26.4
+pandas==2.2.1
+matplotlib==3.8.4
+tqdm==4.66.4
+mpltern==1.0.4
+
+# File: trace_code.py
+# Number of Lines: 88
+import os
+
+def print_repository_structure(directory, max_depth, output_file):
+    """
+    Stampa la struttura del repository con profondità massima e salva in un file.
+    Per la directory 'src', esplora fino alla profondità massima specifica.
+    """
+    with open(output_file, 'w', encoding='utf-8') as out_file:
+        out_file.write("Repository Structure:\n")
+        print("Repository Structure:")
+        
+        for root, dirs, files in os.walk(directory):
+            depth = root[len(directory):].count(os.sep)
+            
+            # Per 'src', ignora il limite di profondità
+            if "src" in os.path.relpath(root, directory).split(os.sep):
+                current_max_depth = float('inf')
+            else:
+                current_max_depth = max_depth
+            
+            if depth >= current_max_depth:
+                dirs[:] = []
+                continue
+            
+            indent = "  " * depth
+            folder_name = os.path.basename(root) or root
+            out_file.write(f"{indent}{folder_name}/\n")
+            print(f"{indent}{folder_name}/")
+            
+            for file in files:
+                file_indent = "  " * (depth + 1)
+                out_file.write(f"{file_indent}{file}\n")
+                print(f"{file_indent}{file}")
+
+
+def collect_code_to_file(directory, output_file):
+    """
+    Raccoglie codice rilevante dai file nel repository e lo salva in un file di output.
+    """
+    # Escludi file e directory irrilevanti
+    exclude_files = {'.DS_Store', '.gitignore', 'LICENSE.md', 'BestPractices.md', 'README.md', 'FunctionalRequirements.md', 'SETUP.md'}
+    exclude_dirs = {'.pytest_cache', '__pycache__', '.venv', 'node_modules', 'dist', 'build', 'docs/_build', '.git', 'utility', 'history.csv'}
+
+    # Assicurati che la directory del file di output esista
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    with open(output_file, 'a', encoding='utf-8') as out_file:  # Usa modalità 'a' per appendere
+        out_file.write('"""\n\nRepository Code Collection\n\n')
+        
+        for root, dirs, files in os.walk(directory):
+            # Escludi directory specificate
+            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+
+            for file in files:
+                if file in exclude_files:
+                    continue
+
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, directory)
+                
+                # Filtra file binari o con permessi non accessibili
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
+                except (UnicodeDecodeError, PermissionError):
+                    print(f"Skipping file {relative_path} due to encoding/permission issues.")
+                    continue
+                
+                # Stampa il nome del file e il contenuto
+                out_file.write(f'# File: {relative_path}\n')
+                out_file.write(f'# Number of Lines: {len(lines)}\n')
+                out_file.write(''.join(lines))
+                out_file.write('\n\n')  # Spazio tra i file
+        out_file.write('"""\n\n')
+
+    print(f"Code collected and saved to {output_file}.")
+
+
+if __name__ == "__main__":
+    # Configura la directory del repository e il file di output
+    repository_path = "/Users/stefanobisignano/Downloads/CI2024_lab3-main"
+    output_file_path = "/Users/stefanobisignano/Downloads/CI2024_lab3-main/collected_code.txt"
+
+    # Stampa la struttura del repository e salva nel file di output
+    print_repository_structure(repository_path, max_depth=2, output_file=output_file_path)
+
+    # Raccogli il codice e salva nel file di output
+    collect_code_to_file(repository_path, output_file_path)
+
+
+# File: collected_code.txt
+# Number of Lines: 19
+Repository Structure:
+CI2024_lab3-main/
+  custom_heuristics.py
+  requirements.txt
+  trace_code.py
+  collected_code.txt
+  puzzle.py
+  graph.py
+  priorityqueue.py
+  README.md
+  .gitignore
+  path_search.py
+  main.py
+  parameters_optimization.py
+  benchmarking.py
+  plots/
+    5x5.jpg
+    3x3.jpg
+    4x4.jpg
+
+
+# File: puzzle.py
+# Number of Lines: 169
+import time
+from enum import Enum
+from typing import Self
+
+import numpy as np
+
+
+class Action(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
+
+
+DIRECTIONS = {
+    Action.UP: (-1, 0),
+    Action.DOWN: (1, 0),
+    Action.LEFT: (0, -1),
+    Action.RIGHT: (0, 1),
+}
+
+
+class InvalidMoveError(Exception):
+    pass
+
+
+class Board:
+    def __init__(
+        self,
+        board: np.ndarray | list[list[int]] | int,
+        seed: int = None,
+        random_steps: int = None,
+    ):
+        """Create a board state for the n-puzzle problem.
+        If board is given as list or array, the other arguments are ignored.
+        If it's given as an integer, a random board is generated.
+        Providing a seed will make the generation deterministic.
+        If random_steps is given, the board will be obtained by making random_steps random moves from the solved state instead of generating a totally random permutation.
+        """
+        if seed is None:
+            seed = time.time_ns()
+        rng = np.random.Generator(np.random.PCG64(seed=seed))
+        if isinstance(board, int):
+            if board < 2:
+                raise ValueError("Board size must be at least 2x2")
+            self.size = board
+            self.m = None
+
+            if random_steps is not None:
+                self.m = np.arange(self.size**2)
+                self.m = np.roll(self.m, -1).reshape(self.size, self.size)
+                for _ in range(random_steps):
+                    self.position = tuple(x[0] for x in np.nonzero(self.m == 0))
+                    self.valid_actions = self._get_valid_actions()
+                    action = rng.choice(
+                        [a for a, v in enumerate(self.valid_actions) if v]
+                    )
+                    self.m = self.act(Action(action)).m
+
+            while (
+                self.m is None
+            ):  # Randomly generate a board until a solvable one is found
+                self.m = rng.permutation(self.size**2).reshape(self.size, self.size)
+                self.position = tuple(x[0] for x in np.nonzero(self.m == 0))
+                if not self.solvable():
+                    self.m = None
+
+        elif isinstance(board, list) and (
+            not isinstance(board[0], list)
+            or not all(len(row) == len(board) for row in board)
+        ):
+            raise ValueError("Board must be square")
+        elif isinstance(board, list):
+            self.size = len(board)
+            self.m = np.array(board)
+            self.position = tuple(x[0] for x in np.nonzero(self.m == 0))
+        elif isinstance(board, np.ndarray):
+            self.size = board.shape[0]
+            self.m = board
+            self.position = tuple(x[0] for x in np.nonzero(self.m == 0))
+        else:
+            raise ValueError("Invalid board")
+
+        self.valid_actions = self._get_valid_actions()
+
+    def _get_valid_actions(self) -> list[Action]:
+        actions = np.zeros((4,), dtype=bool)
+
+        if self.position[0] != 0:
+            actions[Action.UP.value] = True
+
+        if self.position[0] != self.size - 1:
+            actions[Action.DOWN.value] = True
+
+        if self.position[1] != 0:
+            actions[Action.LEFT.value] = True
+
+        if self.position[1] != self.size - 1:
+            actions[Action.RIGHT.value] = True
+
+        return actions
+
+    def act(self, action: Action) -> Self:
+        if not self.valid_actions[action.value]:
+            raise InvalidMoveError(f"Trying to move {action} in {self}")
+
+        new_pos = (
+            self.position[0] + DIRECTIONS[action][0],
+            self.position[1] + DIRECTIONS[action][1],
+        )
+
+        new_board = self.m.copy()
+        new_board[self.position], new_board[new_pos] = (
+            new_board[new_pos],
+            new_board[self.position],
+        )
+        b = Board(new_board)
+        return b
+
+    def __eq__(self, other):
+        if not isinstance(other, Board):
+            return False
+        return np.array_equal(self.m, other.m)
+
+    def __hash__(self):
+        return hash(self.m.tobytes())
+
+    def __str__(self):
+        return str(self.m)
+
+    def __repr__(self):
+        return str(self)
+
+    def __iter__(self):
+        return iter(self.m)
+
+    def __getitem__(self, key):
+        return self.m[key]
+
+    def manhattan_distance(self, other: Self) -> int:
+        distance = 0
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.m[i][j] != 0:
+                    x, y = np.nonzero(other.m == self.m[i][j])
+                    x, y = x[0], y[0]
+                    distance += abs(x - i) + abs(y - j)
+        return distance
+
+    def hamming_distance(self, other: Self) -> int:
+        distance = 0
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.m[i][j] != other.m[i][j]:
+                    distance += 1
+        return distance
+
+    def solvable(self):
+        inversions = 0
+        for i in range(self.size**2 - 1):
+            x, y = divmod(i, self.size)
+            for j in range(i + 1, self.size**2):
+                a, b = divmod(j, self.size)
+                if self[a][b] != 0 and self[x][y] != 0 and self.m[x][y] > self.m[a][b]:
+                    inversions += 1
+        if self.size % 2 == 0:
+            return (inversions + self.position[0]) % 2 == 1
+
+        return inversions % 2 == 0
+
+
+# File: graph.py
+# Number of Lines: 106
+"""
+I used the graph class to implement a custom draw function which I could not obtain with networkx.
+It's drawn mostly as a tree, with the additional edges going back.
+I also use the find_path method to get the path from the solution to the starting node.
+
+The graph is represented with redundance in two structures:
+- neighbors: {node: (level, [neighbours])}
+- nodes: [[nodes_at_level0], [nodes_at_level1], ...]
+
+The nodes needs to implement __hash__ and __eq__ methods to be used as keys in the neighbors dict.
+"""
+
+from collections.abc import Hashable
+from typing import TypeVar
+
+T = TypeVar("T", bound=Hashable)
+
+
+class Graph[T]:
+    def __init__(self):
+        self.neighbors: dict[T, (int, list[T])] = {}  # {node: [neighbours]}
+        self.nodes = []
+        self.len = 0
+
+    def add_node(self, item: T, parent: T = None):
+        if item not in self.neighbors:
+            self.neighbors[item] = (None, [])
+            if parent:
+                n = self.neighbors[parent][0] + 1
+                if self.len <= n:
+                    self.nodes.append([])
+                    self.len += 1
+                self.nodes[n].append(item)
+            else:
+                n = 0
+                self.nodes.append(
+                    [
+                        item,
+                    ]
+                )
+                self.len += 1
+            self.neighbors[item] = (n, self.neighbors[item][1])
+
+    def add_edge(self, node1: T, node2: T):
+        self.neighbors[node1][1].append(node2)
+        self.neighbors[node2][1].append(node1)
+
+    def __contains__(self, item: T):
+        print(self.neighbors)
+        return item in self.neighbors
+
+    def draw(self):
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.yaxis.set_visible(False)
+        ax.xaxis.set_visible(False)
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+        coords = {}
+        for i, nodes in enumerate(self.nodes):
+            for j, node in enumerate(nodes):
+                x = (j + 0.5) / len(nodes)
+                y = 0.98 - i / self.len
+                ax.text(
+                    x,
+                    y,
+                    node,
+                    ha="right",
+                    va="bottom",
+                    transform=ax.transAxes,
+                )
+                ax.plot(
+                    x,
+                    y,
+                    "o",
+                    color="black",
+                    transform=ax.transAxes,
+                )
+                coords[node] = (x, y)
+
+        for neighbor in self.neighbors:
+            for n in self.neighbors[neighbor][1]:
+                ax.plot(
+                    [coords[neighbor][0], coords[n][0]],
+                    [coords[neighbor][1], coords[n][1]],
+                    "-",
+                    color="black",
+                    transform=ax.transAxes,
+                )
+        plt.show()
+
+    def find_path(self, node: T):
+        path = [node]
+        while self.neighbors[node][0] != 0:
+            node = next(
+                filter(
+                    lambda i: i[1][0] == self.neighbors[node][0] - 1
+                    and node in i[1][1],
+                    self.neighbors.items(),
+                )
+            )[0]
+            path.append(node)
+        return list(reversed(path))
+
+
+# File: priorityqueue.py
+# Number of Lines: 46
+from collections.abc import Hashable
+from typing import TypeVar
+
+T = TypeVar("T", bound=Hashable)
+
+
+class PriorityQueue[T]:
+    def __init__(self):
+        self.queue = []
+        self.size = 0
+
+    def push(self, item: T, priority: int):
+        self.queue.append((item, priority))
+        self.size += 1
+        self.queue.sort(key=lambda x: x[1])
+
+    def pop(self):
+        if self.size == 0:
+            raise IndexError("pop from empty queue")
+        self.size -= 1
+        return self.queue.pop()[0]
+
+    def __len__(self):
+        return self.size
+
+    def __contains__(self, item: T):
+        return item in self.queue
+
+    def __iter__(self):
+        return iter(self.queue)
+
+    def __str__(self):
+        return str(self.queue)
+
+    def __repr__(self):
+        return str(self.queue)
+
+    def __getitem__(self, index: int):
+        return self.queue[index]
+
+    def __setitem__(self, index: int, value: T):
+        self.queue[index] = value
+
+    def __delitem__(self, index: int):
+        del self.queue[index]
+        self.size -= 1
+
+
+# File: path_search.py
+# Number of Lines: 98
+from concurrent.futures import CancelledError
+
+import numpy as np
+
+from graph import Graph
+from priorityqueue import PriorityQueue
+from puzzle import Action, Board
+
+
+class Solver:
+    def __init__(
+        self,
+        starting_board: Board,
+        algorithm: str = "astar",
+        heuristic="manhattan",
+        plot=False,
+    ):
+        algorithm = algorithm.lower()
+
+        assert algorithm in ["bfs", "dfs", "astar"]
+        if algorithm == "astar":
+            assert callable(heuristic) or heuristic in [
+                "manhattan",
+                "hamming",
+                "dijkstra",
+            ]
+        assert starting_board.solvable(), "Puzzle is not solvable"
+
+        self.board = starting_board
+        self.solution = np.arange(self.board.size**2)
+        self.solution = Board(
+            np.roll(self.solution, -1).reshape(self.board.size, self.board.size)
+        )
+        self.graph = Graph()
+        self.algorithm = algorithm
+        self.plot = plot
+
+        if isinstance(heuristic, str):
+            match heuristic.lower():
+                case "manhattan":
+                    self.heuristic = lambda x: x.manhattan_distance(self.solution)
+                case "hamming":
+                    self.heuristic = lambda x: x.hamming_distance(self.solution)
+                case "dijkstra":
+                    self.heuristic = lambda x: 0
+        else:
+            self.heuristic = heuristic
+
+    def run(self):
+        frontier = PriorityQueue()
+        explored_nodes = set()
+
+        current_board = self.board
+        self.cost = 0
+
+        frontier.push(current_board, 0)
+        self.graph.add_node(current_board)
+        while frontier:
+            if current_board == self.solution:
+                break
+            if self.not_converging():
+                raise CancelledError("Not converging")
+            current_board = frontier.pop()
+            explored_nodes.add(current_board)
+            valid_actions = np.nonzero(current_board.valid_actions)[0]
+            self.cost += 1
+            for action in valid_actions:
+                new: Board = current_board.act(Action(action))
+                if new not in explored_nodes and new not in frontier:
+                    priority = self.get_priority(new)
+                    frontier.push(new, priority)
+                    self.graph.add_node(new, current_board)
+                self.graph.add_edge(current_board, new)
+        else:
+            raise ValueError("No solution found")
+
+        if self.plot:
+            self.graph.draw()
+        path = self.graph.find_path(current_board)
+        return path, len(path) - 1, self.cost
+
+    def get_priority(self, board: Board):
+        match self.algorithm:
+            case "bfs":
+                return -self.cost
+            case "dfs":
+                return 0
+            case "astar":
+                return -1 - self.heuristic(board)
+
+    def not_converging(self):
+        """
+        This is not mathematically true, it's just problems that take too long to solve.
+        The heuristic is either not acceptable or just terrible, might as well stop
+        """
+        return (self.board.size == 4 and self.cost > 20000) or (
+            self.board.size == 5 and self.cost > 60000
+        )
+
+
+# File: main.py
+# Number of Lines: 103
+"""
+Solve lab3
+"""
+
+from custom_heuristics import improved_manhattan
+from path_search import Solver
+from puzzle import Board
+
+SEED = 0
+
+instances = [
+    {
+        "starting_board": Board(3, SEED),
+        "algorithm": "astar",
+        "heuristic": "manhattan",
+        "plot": False,
+    },
+    {
+        "starting_board": Board(3, SEED),
+        "algorithm": "astar",
+        "heuristic": improved_manhattan(3),
+        "plot": False,
+    },
+    {
+        "starting_board": Board(4, SEED),
+        "algorithm": "astar",
+        "heuristic": "manhattan",
+        "plot": False,
+    },
+    {
+        "starting_board": Board(4, SEED),
+        "algorithm": "astar",
+        "heuristic": improved_manhattan(4),
+        "plot": False,
+    },
+    {
+        "starting_board": Board(5, SEED),
+        "algorithm": "astar",
+        "heuristic": "manhattan",
+        "plot": False,
+    },
+    {
+        "starting_board": Board(5, SEED),
+        "algorithm": "astar",
+        "heuristic": improved_manhattan(5),
+        "plot": False,
+    },
+    {
+        "starting_board": Board(6, SEED),
+        "algorithm": "astar",
+        "heuristic": improved_manhattan(6),
+        "plot": False,
+    },
+]
+
+
+def print_path(path):
+    size = path[0].size
+    if (len(path)) > 40:
+        # Just print first and last 20 steps
+        path = path[:20] + path[-20:]
+    max_digits = len(str(size**2))
+    s = ["" for _ in range(size)]
+    for count, node in enumerate(path):
+        for i in range(size):
+            if i == size // 2:
+                sep = "   ->  "
+                if count == 20:
+                    sep = "  ...  "
+            else:
+                sep = "       "
+            s[i] += " ".join(f"{num:>{max_digits}}" for num in node[i]) + sep
+
+    while len(s[0]) > 80:
+        for i in range(size):
+            print(s[i][:80])
+            s[i] = s[i][80:]
+        print()
+    for i in range(size):
+        print(s[i][:-6])
+
+
+def main():
+    for instance in instances:
+        print(
+            f"Running {instance['algorithm']}"
+            + (
+                f" with {instance['heuristic']}"
+                if instance["algorithm"] == "astar"
+                else ""
+            )
+        )
+
+        path, quality, cost = Solver(**instance).run()
+
+        print(f"Explored {cost} nodes")
+        print(f"Solution reached in {quality} steps")
+        print_path(path)
+        print()
+
+
+if __name__ == "__main__":
+    main()
+
+
+# File: parameters_optimization.py
+# Number of Lines: 240
+import csv
+import sys
+from concurrent.futures import CancelledError, Future, ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import Iterable
+
+import matplotlib.pyplot as plt
+import mpltern  # noqa
+import numpy as np
+import pandas as pd
+import tqdm
+
+from custom_heuristics import improved_manhattan
+from path_search import Solver
+from puzzle import Board
+
+FILENAME = "history.csv"
+SAMPLES = 50
+BOARD_SIZE = 4
+
+# Some problems take too long to solve or don't converge, likely due to the heuristic being not acceptable with the given weights.
+# concurrent.futures.as_completed takes a timeout but it's for the whole process, not for each individual future.
+# Besides, process pools don't have a way to actually kill the processes that are taking too long, so it still waits for them to finish.
+# Thread pools have a way to cancel futures, but they don't have as much benefit as processes in this case.
+# For this reason I added a function in path_search to raise a CancelledError when the problem is taking too long.
+
+
+def process_main(weights, board):
+    instance = {
+        "starting_board": board,
+        "algorithm": "astar",
+        "heuristic": improved_manhattan(board.size, weights),
+        "plot": False,
+    }
+    try:
+        _, quality, cost = Solver(**instance).run()
+    except CancelledError:
+        return None, None, None, None
+    return quality, cost, weights, board.size
+
+
+def explore_parameters(samples, filename, board_size):
+    ranges = [
+        (0, 1),
+        (0, 1),
+        (0, 1),
+    ]
+    futures: list[Future] = []
+    n = 0
+    with tqdm.tqdm(
+        desc="Generating exploration space", total=samples * board_size
+    ) as pbar:
+        with ProcessPoolExecutor() as executor:
+            for _ in range(samples):
+                weights: list[float] = [np.random.uniform(*r) for r in ranges]
+                weights = weights / np.sum(weights)
+
+                for _ in range(
+                    board_size
+                ):  # higher board size has more variability, so we try each weight set a bit more times to average out the board's difficulty
+                    random_board = Board(board_size)
+                    f = executor.submit(
+                        process_main, weights=weights, board=random_board
+                    )
+                    futures.append(f)
+                    pbar.update(1)
+            pbar.reset()
+            pbar.set_description_str(f"Trying {samples} random weights")
+            try:
+                for future in as_completed(fs=futures):
+                    quality, cost, weights, size = future.result()
+                    if quality:
+                        with open(filename, "a+") as f:
+                            writer = csv.writer(f)
+                            writer.writerow((*weights, quality, cost, size))
+                    else:
+                        n += 1
+                    pbar.update(1)
+            except TimeoutError:
+                print("Shutting Down")
+                executor.shutdown(wait=False, cancel_futures=True)
+                n += len([f.cancelled() for f in futures])
+
+    if n > 0:
+        print(f"Skipped {n} iterations due to timeout")
+
+
+def plot_history(filename, board_size=None):
+    with open(filename, "r") as f:
+        history = pd.read_csv(
+            f, dtype={0: float, 1: float, 2: float, 3: float, 4: float, 5: int}
+        )
+
+    # Normalize the data separately for each Size
+    for size in history.loc[:, "Size"].unique():
+        # Ignore weights, only normalize columns 3 and 4
+        history.loc[history.loc[:, "Size"] == size, ["Quality", "Cost"]] = (
+            history.loc[history.loc[:, "Size"] == size, ["Quality", "Cost"]]
+            - history.loc[history.loc[:, "Size"] == size, ["Quality", "Cost"]].min()
+        ) / (
+            history.loc[history.loc[:, "Size"] == size, ["Quality", "Cost"]].max()
+            - history.loc[history.loc[:, "Size"] == size, ["Quality", "Cost"]].min()
+        )
+        filtered_history = history.loc[history.loc[:, "Size"] == size]
+        filtered_history = (
+            filtered_history.groupby(["Manhattan_W", "Conflicts_W", "Inversions_W"])
+            .mean()
+            .reset_index()
+        )
+        levels = np.linspace(0, 1, 15)
+        if (
+            size == board_size
+            or (isinstance(board_size, Iterable) and size in board_size)
+            or board_size is None
+        ):
+            fig = plt.figure(size, figsize=(25, 22))
+            fig.text(
+                0.5,
+                0.7,
+                f"{filtered_history.shape[0]} samples",
+                ha="center",
+                va="center",
+            )
+            fig.canvas.manager.set_window_title(f"{size}x{size} board")
+            cost_ax = fig.add_subplot(121, projection="ternary")
+            cost_ax.set_title(label="Cost")
+            cost_ax.set_llabel("Conflicts")
+            cost_ax.set_rlabel("Inversions")
+            cost_ax.set_tlabel("Manhattan")
+            cost_ax.tick_params(
+                axis="both",
+                which="both",
+                bottom=False,
+                top=False,
+                left=False,
+                right=False,
+                labelbottom=False,
+                labeltop=False,
+                labelleft=False,
+                labelright=False,
+            )
+            cost_ax.tricontourf(
+                filtered_history.loc[:, "Manhattan_W"],
+                filtered_history.loc[:, "Conflicts_W"],
+                filtered_history.loc[:, "Inversions_W"],
+                filtered_history.loc[:, "Cost"],
+                levels=levels,
+            )
+
+            qual_ax: plt.axes = fig.add_subplot(122, projection="ternary")
+            qual_ax.set_title("Quality")
+            qual_ax.set_llabel("Conflicts")
+            qual_ax.set_rlabel("Inversions")
+            qual_ax.set_tlabel("Manhattan")
+            qual_ax.tick_params(
+                axis="both",
+                which="both",
+                bottom=False,
+                top=False,
+                left=False,
+                right=False,
+                labelbottom=False,
+                labeltop=False,
+                labelleft=False,
+                labelright=False,
+            )
+            img = qual_ax.tricontourf(
+                filtered_history.loc[:, "Manhattan_W"],
+                filtered_history.loc[:, "Conflicts_W"],
+                filtered_history.loc[:, "Inversions_W"],
+                filtered_history.loc[:, "Quality"],
+                levels=levels,
+            )
+
+            cb = fig.colorbar(
+                mappable=img, ax=[qual_ax, cost_ax], location="bottom", shrink=0.6
+            )
+            # cb.set_label("Lower is better")
+            point = fig.text(
+                0.5,
+                0.5,
+                "",
+                ha="center",
+                va="center_baseline",
+                fontsize=12,
+                weight="bold",
+            )
+
+            # Event handler for clicking on either plot
+            def on_click(event):
+                if event.inaxes in [
+                    qual_ax,
+                    cost_ax,
+                ]:  # Check if the click is on either subplot
+                    ax = event.inaxes  # Determine which subplot was clicked
+                    # Get ternary coordinates from Cartesian (mpltern provides this automatically)
+                    a, b, c = ax.transProjection.inverted().transform(
+                        [event.xdata, event.ydata]
+                    )
+                    if 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1:  # Valid point check
+                        # Change the text in variable `point`
+                        point.set_text(
+                            f"Mahattan: {a:.2f}\nConflicts: {b:.2f}\nInversions: {c:.2f}"
+                        )
+                        fig.canvas.draw()
+
+            # Connect the event to the handler
+            fig.canvas.mpl_connect("button_press_event", on_click)
+            plt.tight_layout(rect=[0.05, 0.27, 0.95, 0.95])
+            plt.savefig(
+                f"plots/{board_size}x{board_size}.jpg",
+                dpi=300,
+                bbox_inches="tight",
+                pad_inches=0.3,
+            )
+    plt.show()
+
+
+if __name__ == "__main__":
+    if not any(x in ["-s", "--skip", "SKIP"] for x in sys.argv):
+        if not Path(FILENAME).exists():
+            with open(FILENAME, "w") as f:
+                csv.writer(f).writerow(
+                    [
+                        "Manhattan_W",
+                        "Conflicts_W",
+                        "Inversions_W",
+                        "Quality",
+                        "Cost",
+                        "Size",
+                    ]
+                )
+        explore_parameters(
+            filename=FILENAME,
+            samples=SAMPLES,
+            board_size=BOARD_SIZE,
+        )
+
+    if any(x in ["-p", "--plot", "PLOT"] for x in sys.argv):
+        plot_history(FILENAME, board_size=BOARD_SIZE)
+
+
+# File: benchmarking.py
+# Number of Lines: 57
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+import tqdm
+
+from custom_heuristics import improved_manhattan
+from path_search import Solver
+from puzzle import Board
+
+
+def process_main(board):
+    instance = {
+        "starting_board": board,
+        "algorithm": "astar",
+        "heuristic": improved_manhattan(board.size),
+        "plot": False,
+    }
+    _, quality, cost = Solver(**instance).run()
+    return quality, cost
+
+
+def run_benchmark(iters, board_size, seed=0):
+    futures: list = []
+    avg_quality = 0
+    avg_cost = 0
+    with tqdm.tqdm(
+        desc=f"Solving {iters} random {board_size}x{board_size} problems", total=iters
+    ) as pbar:
+        with ProcessPoolExecutor() as executor:
+            for _ in range(iters):
+                random_board = Board(board_size, seed)
+
+                t = executor.submit(process_main, board=random_board)
+                futures.append(t)
+
+            for future in as_completed(fs=futures):
+                quality, cost = future.result()
+                avg_quality += quality / iters
+                avg_cost += cost / iters
+                pbar.update(1)
+
+    return avg_quality, avg_cost
+
+
+def main():
+    quality_3, cost_3 = run_benchmark(5000, 3, None)
+    print("3x3 Benchmark:")
+    print(f"\tAvg Quality: {quality_3:.2f}\n\tAvg Cost: {cost_3:.2f}")
+    quality_4, cost_4 = run_benchmark(1000, 4, None)
+    print("4x4 Benchmark:")
+    print(f"\tAvg Quality: {quality_4:.2f}\n\tAvg Cost: {cost_4:.2f}")
+    quality_5, cost_5 = run_benchmark(50, 5, None)
+    print("5x5 Benchmark:")
+    print(f"\tAvg Quality: {quality_5:.2f}\n\tAvg Cost: {cost_5:.2f}")
+
+
+if __name__ == "__main__":
+    main()
+
+
+"""
+
