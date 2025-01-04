@@ -50,6 +50,11 @@ symbolic_regression/
     models/
     plots/
     reports/
+      benchmark.md
+      operator_benchmark/
+        results.txt
+  reports/
+    operator_benchmark_results.txt
   src/
     __init__.py
     main.py
@@ -74,6 +79,11 @@ symbolic_regression/
       plotting.py
       __init__.py
       random.py
+      __pycache__/
+        benchmark.cpython-311.pyc
+        __init__.cpython-311.pyc
+    __pycache__/
+      __init__.cpython-311.pyc
     preprocessing/
       data_loader.py
       splitter.py
@@ -87,9 +97,11 @@ Repository Code Collection
 
 
 # File: main.py
-# Number of Lines: 17
-from operators.benchmark import run_benchmark
+# Number of Lines: 19
+from symbolic_regression.src.utils.benchmark import run_benchmark
 from operators.definitions import operator_set
+import sys
+print("\n".join(sys.path))
 
 def print_sorted_operators():
     """
@@ -124,7 +136,7 @@ print_sorted_operators()
 
 
 # File: operators/definitions.py
-# Number of Lines: 205
+# Number of Lines: 195
 from typing import Callable, Dict, NamedTuple, Optional
 import numpy as np
 
@@ -205,92 +217,82 @@ class OperatorSet:
     def _define_unary_operators(self):
         """Defines unary operators."""
         self.operators["neg"] = OperatorSpec(
-            name="neg", function=lambda x: -x, precedence=4, arity=1, symbol="-", latex_symbol="-", cost=0.1
+            name="neg", function=lambda x: -x, precedence=4, arity=1, symbol="-", latex_symbol="-", cost=0.0441
         )
         self.operators["abs"] = OperatorSpec(
-            name="abs", function=np.abs, precedence=4, arity=1, symbol="abs", latex_symbol="|x|", cost=0.2
+            name="abs", function=np.abs, precedence=4, arity=1, symbol="abs", latex_symbol="|x|", cost=0.0478
         )
         self.operators["log"] = OperatorSpec(
-            name="log", function=safe_log, precedence=5, arity=1, symbol="log", latex_symbol=r"\log(x)", cost=1.0
+            name="log", function=safe_log, precedence=5, arity=1, symbol="log", latex_symbol=r"\log(x)", cost=0.3753
         )
         self.operators["log2"] = OperatorSpec(
-            name="log2", function=safe_log2, precedence=5, arity=1, symbol="log2", latex_symbol=r"\log_2(x)", cost=1.0
+            name="log2", function=safe_log2, precedence=5, arity=1, symbol="log2", latex_symbol=r"\log_2(x)", cost=0.3799
         )
         self.operators["log10"] = OperatorSpec(
-            name="log10", function=safe_log10, precedence=5, arity=1, symbol="log10", latex_symbol=r"\log_{10}(x)", cost=1.0
+            name="log10", function=safe_log10, precedence=5, arity=1, symbol="log10", latex_symbol=r"\log_{10}(x)", cost=0.4075
         )
         self.operators["sqrt"] = OperatorSpec(
-            name="sqrt", function=safe_sqrt, precedence=5, arity=1, symbol="sqrt", latex_symbol=r"\sqrt{x}", cost=1.2
+            name="sqrt", function=safe_sqrt, precedence=5, arity=1, symbol="sqrt", latex_symbol=r"\sqrt{x}", cost=0.1544
         )
         self.operators["exp"] = OperatorSpec(
-            name="exp", function=safe_exp, precedence=5, arity=1, symbol="exp", latex_symbol=r"e^{x}", cost=1.5
+            name="exp", function=safe_exp, precedence=5, arity=1, symbol="exp", latex_symbol=r"e^{x}", cost=0.3345
         )
         self.operators["sin"] = OperatorSpec(
-            name="sin", function=np.sin, precedence=5, arity=1, symbol="sin", latex_symbol=r"\sin(x)", cost=0.5
+            name="sin", function=np.sin, precedence=5, arity=1, symbol="sin", latex_symbol=r"\sin(x)", cost=0.7078
         )
         self.operators["cos"] = OperatorSpec(
-            name="cos", function=np.cos, precedence=5, arity=1, symbol="cos", latex_symbol=r"\cos(x)", cost=0.5
+            name="cos", function=np.cos, precedence=5, arity=1, symbol="cos", latex_symbol=r"\cos(x)", cost=0.7157
         )
         self.operators["tan"] = OperatorSpec(
-            name="tan", function=np.tan, precedence=5, arity=1, symbol="tan", latex_symbol=r"\tan(x)", cost=0.5
-        )
-        self.operators["sinh"] = OperatorSpec(
-            name="sinh", function=np.sinh, precedence=5, arity=1, symbol="sinh", latex_symbol=r"\sinh(x)", cost=0.6
-        )
-        self.operators["cosh"] = OperatorSpec(
-            name="cosh", function=np.cosh, precedence=5, arity=1, symbol="cosh", latex_symbol=r"\cosh(x)", cost=0.6
+            name="tan", function=np.tan, precedence=5, arity=1, symbol="tan", latex_symbol=r"\tan(x)", cost=0.4139
         )
         self.operators["tanh"] = OperatorSpec(
-            name="tanh", function=np.tanh, precedence=5, arity=1, symbol="tanh", latex_symbol=r"\tanh(x)", cost=0.6
+            name="tanh", function=np.tanh, precedence=5, arity=1, symbol="tanh", latex_symbol=r"\tanh(x)", cost=0.3118
         )
+
 
     def _define_binary_operators(self):
         """Defines binary operators."""
         self.operators["add"] = OperatorSpec(
-            name="add", function=np.add, precedence=1, arity=2, symbol="+", latex_symbol="+", cost=0.1
+            name="add", function=np.add, precedence=1, arity=2, symbol="+", latex_symbol="+", cost=0.0595
         )
         self.operators["sub"] = OperatorSpec(
-            name="sub", function=np.subtract, precedence=1, arity=2, symbol="-", latex_symbol="-", cost=0.1
+            name="sub", function=np.subtract, precedence=1, arity=2, symbol="-", latex_symbol="-", cost=0.0591
         )
         self.operators["mul"] = OperatorSpec(
-            name="mul", function=np.multiply, precedence=2, arity=2, symbol="*", latex_symbol=r"\times", cost=0.2
+            name="mul", function=np.multiply, precedence=2, arity=2, symbol="*", latex_symbol=r"\times", cost=0.0595
         )
         self.operators["div"] = OperatorSpec(
-            name="div", function=safe_divide, precedence=2, arity=2, symbol="/", latex_symbol=r"\div", cost=0.5
+            name="div", function=safe_divide, precedence=2, arity=2, symbol="/", latex_symbol=r"\div", cost=0.1533
         )
         self.operators["pow"] = OperatorSpec(
-            name="pow", function=safe_power, precedence=3, arity=2, symbol="^", latex_symbol="^", cost=1.5
+            name="pow", function=safe_power, precedence=3, arity=2, symbol="^", latex_symbol="^", cost=0.8958
         )
         self.operators["min"] = OperatorSpec(
-            name="min", function=lambda x, y: np.minimum(x, y), precedence=1, arity=2, symbol="min", latex_symbol=r"\min(x, y)", cost=0.3
+            name="min", function=lambda x, y: np.minimum(x, y), precedence=1, arity=2, symbol="min", latex_symbol=r"\min(x, y)", cost=0.0611
         )
         self.operators["max"] = OperatorSpec(
-            name="max", function=lambda x, y: np.maximum(x, y), precedence=1, arity=2, symbol="max", latex_symbol=r"\max(x, y)", cost=0.3
-        )
-        self.operators["atan2"] = OperatorSpec(
-            name="atan2", function=np.arctan2, precedence=3, arity=2, symbol="atan2", latex_symbol=r"\arctan2(x, y)", cost=1.0
+            name="max", function=lambda x, y: np.maximum(x, y), precedence=1, arity=2, symbol="max", latex_symbol=r"\max(x, y)", cost=0.0637
         )
         self.operators["hypot"] = OperatorSpec(
-            name="hypot", function=np.hypot, precedence=2, arity=2, symbol="hypot", latex_symbol=r"\hypot(x, y)", cost=0.4
+            name="hypot", function=np.hypot, precedence=2, arity=2, symbol="hypot", latex_symbol=r"\hypot(x, y)", cost=0.2068
         )
         self.operators["mod"] = OperatorSpec(
-            name="mod", function=lambda x, y: np.mod(x, y), precedence=2, arity=2, symbol="%", latex_symbol=r"x \mod y", cost=0.3
-        )
-        self.operators["floor_div"] = OperatorSpec(
-            name="floor_div", function=lambda x, y: np.floor_divide(x, y), precedence=2, arity=2, symbol="//", latex_symbol=r"\lfloor \frac{x}{y} \rfloor", cost=0.4
+            name="mod", function=lambda x, y: np.mod(x, y), precedence=2, arity=2, symbol="%", latex_symbol=r"x \mod y", cost=1.0000
         )
         self.operators["pow2"] = OperatorSpec(
-            name="pow2", function=lambda x: np.power(x, 2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=1.0
+            name="pow2", function=lambda x: np.power(x, 2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0568
         )
         self.operators["pow3"] = OperatorSpec(
-            name="pow3", function=lambda x: np.power(x, 3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=1.0
+            name="pow3", function=lambda x: np.power(x, 3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.6975
         )
         self.operators["pow4"] = OperatorSpec(
-            name="pow4", function=lambda x: np.power(x, 4), precedence=3, arity=1, symbol="pow4", latex_symbol=r"x^4", cost=1.0
+            name="pow4", function=lambda x: np.power(x, 4), precedence=3, arity=1, symbol="pow4", latex_symbol=r"x^4", cost=0.6982
         )
         self.operators["pow5"] = OperatorSpec(
-            name="pow5", function=lambda x: np.power(x, 5), precedence=3, arity=1, symbol="pow5", latex_symbol=r"x^5", cost=1.0
+            name="pow5", function=lambda x: np.power(x, 5), precedence=3, arity=1, symbol="pow5", latex_symbol=r"x^5", cost=0.6811
         )
+
 
     def get_sorted_operators(self, by: str = "cost") -> Dict[str, OperatorSpec]:
         """
@@ -353,39 +355,79 @@ BINARY_OPERATORS = operator_set.get_binary_operators()
 
 
 # File: utils/benchmark.py
-# Number of Lines: 32
-# operators/benchmark.py
+# Number of Lines: 72
+# utils/benchmark.py
 import numpy as np
 import time
-from .definitions import OperatorSet
+import os
+from src.operators.definitions import OperatorSet
 
-def benchmark_operator_costs(operator_set: OperatorSet, array_size: int = int(1e6)) -> None:
+def benchmark_operator_costs(operator_set: OperatorSet, array_size: int = int(1e6), iterations: int = 5) -> None:
     """
-    Benchmarks the computational cost of all operators and updates their cost attribute.
+    Benchmarks the computational cost of all operators across multiple iterations
+    and updates their cost attribute with the average time.
 
     Args:
         operator_set (OperatorSet): The set of operators to benchmark.
         array_size (int): Size of the array for benchmarking.
+        iterations (int): Number of times to repeat the benchmark for averaging.
     """
     x = np.random.rand(array_size) * 1000
     y = np.random.rand(array_size) * 1000
 
     for name, op in operator_set.operators.items():
-        start_time = time.time()
-        if op.arity == 1:
-            op.function(x)
-        elif op.arity == 2:
-            op.function(x, y)
-        elapsed_time = time.time() - start_time
-        operator_set.operators[name] = op._replace(cost=elapsed_time)  # Update cost
+        total_time = 0.0
+        for _ in range(iterations):
+            start_time = time.time()
+            if op.arity == 1:
+                op.function(x)
+            elif op.arity == 2:
+                op.function(x, y)
+            total_time += time.time() - start_time
+        average_time = total_time / iterations
+        operator_set.operators[name] = op._replace(cost=average_time)  # Update cost
 
-def run_benchmark():
-    """Convenience function to run benchmarks."""
-    from .definitions import operator_set
-    benchmark_operator_costs(operator_set)
-    print("Updated operator costs:")
-    for name, op in operator_set.operators.items():
-        print(f"{name}: cost = {op.cost:.6f}s")
+
+def save_benchmark_results(operator_set: OperatorSet, output_file: str):
+    """
+    Saves the benchmark results to a file in ascending order of cost, including rank.
+
+    Args:
+        operator_set (OperatorSet): The set of operators to save.
+        output_file (str): Path to the output file.
+    """
+    with open(output_file, "w") as file:
+        file.write("Operator Benchmark Results (Averaged)\n")
+        file.write("=====================================\n")
+        for idx, (name, op) in enumerate(sorted(operator_set.operators.items(), key=lambda item: item[1].cost), start=1):
+            file.write(f"{idx}) {name}: cost = {op.cost:.6f}s\n")
+
+
+def run_benchmark(output_dir: str = "reports/", iterations: int = 5):
+    """
+    Runs the benchmark multiple times and saves the averaged results to a file.
+
+    Args:
+        output_dir (str): Directory to save the benchmark results.
+        iterations (int): Number of iterations for averaging.
+    """
+    from src.operators.definitions import operator_set
+
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Run benchmark
+    benchmark_operator_costs(operator_set, iterations=iterations)
+
+    # Save results to a file
+    output_file = os.path.join(output_dir, "operator_benchmark_results.txt")
+    save_benchmark_results(operator_set, output_file)
+    print(f"Benchmark results saved to {output_file}")
+
+
+if __name__ == "__main__":
+    # Esegui il benchmark con 5 iterazioni di default
+    run_benchmark(iterations=100)
 
 
 # File: utils/plotting.py
