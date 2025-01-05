@@ -9,14 +9,14 @@ Il file `definitions.py` definisce gli operatori matematici utilizzati nel frame
 
 ### **1. Operatori Logaritmici**
 #### **`ln` - Logaritmo Naturale**
-- Il logaritmo naturale (\(\ln(x)\)) è la funzione inversa dell’esponenziale con base \(e\) (numero di Eulero, \(e \approx 2.718\)).
+- Il logaritmo naturale ($\ln(x)$) è la funzione inversa dell’esponenziale con base $e$ (numero di Eulero, $e \approx 2.718$).
 - Utilizzato frequentemente in modelli matematici, fisici e statistici.
 - In Python, è implementato tramite `np.log`.
 
 #### **`log2` e `log10` - Logaritmi Specifici**
 - Rappresentano logaritmi con basi fisse:
-  - `log2` (\(\log_2(x)\)): utile in informatica e teoria dell'informazione (ad esempio, calcolo di entropia).
-  - `log10` (\(\log_{10}(x)\)): utilizzato in scale logaritmiche come decibel o pH.
+  - `log2` ($\log_2(x)$): utile in informatica e teoria dell'informazione (ad esempio, calcolo di entropia).
+  - `log10` ($\log_{10}(x)$): utilizzato in scale logaritmiche come decibel o pH.
 
 Questa distinzione evita ambiguità e migliora l’espressività del framework.
 
@@ -26,7 +26,8 @@ Questa distinzione evita ambiguità e migliora l’espressività del framework.
 Operatori specifici come `pow2` e `pow3` riducono la complessità strutturale rispetto all’uso generico di `pow`.
 
 #### **Senza Operatori Specifici**
-Un albero che rappresenta \(x^2 + x^3\) utilizzando solo `pow`:
+Un albero che rappresenta $x^2 + x^3$ utilizzando solo `pow`:
+
 ```
         +
        / \
@@ -39,6 +40,7 @@ Un albero che rappresenta \(x^2 + x^3\) utilizzando solo `pow`:
 
 #### **Con Operatori Specifici**
 Un albero equivalente che utilizza `pow2` e `pow3`:
+
 ```
         +
        / \
@@ -51,13 +53,13 @@ Un albero equivalente che utilizza `pow2` e `pow3`:
 
 ### **Vantaggi**
 1. **Riduzione della complessità**: Alberi più compatti.
-2. **Efficienza computazionale**: Calcoli più veloci con operatori specifici (es. `x * x` rispetto a `np.power(x, 2)`).
+2. **Efficienza computazionale**: Calcoli più veloci con operatori specifici (es. $x * x$ rispetto a `np.power(x, 2)`).
 
 ---
 
 ### **3. Sicurezza Numerica**
 Gli operatori potenzialmente instabili sono implementati come funzioni sicure (`safe_*`):
-- **`safe_ln`**: Previene errori per \(x \leq 0\).
+- **`safe_ln`**: Previene errori per $x \leq 0$.
 - **`safe_divide`**: Gestisce divisioni per zero.
 - **`safe_power`**: Limita la base e l’esponente per evitare overflow.
 
