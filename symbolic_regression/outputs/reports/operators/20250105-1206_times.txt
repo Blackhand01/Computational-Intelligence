@@ -1,0 +1,24 @@
+Operator Benchmark Results (Averaged)
+=====================================
+1) pow2: time = 0.000509s
+2) abs: time = 0.000528s
+3) neg: time = 0.000600s
+4) min: time = 0.000702s
+5) max: time = 0.000713s
+6) mul: time = 0.000728s
+7) add: time = 0.000729s
+8) sub: time = 0.000734s
+9) pow3: time = 0.000783s
+10) div: time = 0.001731s
+11) sqrt: time = 0.001953s
+12) hypot: time = 0.002317s
+13) tanh: time = 0.003472s
+14) exp: time = 0.003939s
+15) ln: time = 0.004340s
+16) log2: time = 0.004577s
+17) tan: time = 0.004686s
+18) log10: time = 0.004817s
+19) cos: time = 0.008301s
+20) sin: time = 0.008305s
+21) pow: time = 0.010336s
+22) mod: time = 0.011538s

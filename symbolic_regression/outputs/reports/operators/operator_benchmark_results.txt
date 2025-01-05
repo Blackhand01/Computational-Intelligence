@@ -1,0 +1,24 @@
+Operator Benchmark Results (Averaged)
+=====================================
+1) pow2: cost = 0.000527s
+2) abs: cost = 0.000528s
+3) neg: cost = 0.000580s
+4) max: cost = 0.000678s
+5) min: cost = 0.000689s
+6) add: cost = 0.000729s
+7) mul: cost = 0.000750s
+8) pow3: cost = 0.000775s
+9) sub: cost = 0.000783s
+10) div: cost = 0.001714s
+11) sqrt: cost = 0.001829s
+12) hypot: cost = 0.002268s
+13) tanh: cost = 0.003437s
+14) exp: cost = 0.003843s
+15) ln: cost = 0.004374s
+16) log2: cost = 0.004483s
+17) tan: cost = 0.004619s
+18) log10: cost = 0.005079s
+19) sin: cost = 0.008173s
+20) cos: cost = 0.008231s
+21) pow: cost = 0.010174s
+22) mod: cost = 0.011466s

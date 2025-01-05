@@ -6,7 +6,6 @@ MAX_EXP = 10
 MAX_POWER = 5
 MAX_FLOAT = 1e10
 MIN_FLOAT = 1e-10
-FLOAT_PRECISION = np.float64
 
 
 def safe_divide(x: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -14,8 +13,8 @@ def safe_divide(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     return np.divide(x, y, out=np.zeros_like(x), where=y != 0)
 
 
-def safe_log(x: np.ndarray) -> np.ndarray:
-    """Applies logarithm safely, avoiding log(0) and negative values."""
+def safe_ln(x: np.ndarray) -> np.ndarray:
+    """Applies natural logarithm safely, avoiding ln(0) and negative values."""
     return np.log(np.clip(x, MIN_FLOAT, MAX_FLOAT))
 
 
@@ -107,81 +106,74 @@ class OperatorSet:
     def _define_unary_operators(self):
         """Defines unary operators."""
         self.operators["neg"] = OperatorSpec(
-            name="neg", function=lambda x: -x, precedence=4, arity=1, symbol="-", latex_symbol="-", cost=0.0441
+            name="neg", function=lambda x: -x, precedence=4, arity=1, symbol="-", latex_symbol="-", cost=0.0520
         )
         self.operators["abs"] = OperatorSpec(
-            name="abs", function=np.abs, precedence=4, arity=1, symbol="abs", latex_symbol="|x|", cost=0.0478
+            name="abs", function=np.abs, precedence=4, arity=1, symbol="abs", latex_symbol="|x|", cost=0.0458
         )
-        self.operators["log"] = OperatorSpec(
-            name="log", function=safe_log, precedence=5, arity=1, symbol="log", latex_symbol=r"\log(x)", cost=0.3753
+        self.operators["ln"] = OperatorSpec(
+            name="ln", function=safe_ln, precedence=5, arity=1, symbol="ln", latex_symbol=r"\ln(x)", cost=0.3761
         )
         self.operators["log2"] = OperatorSpec(
-            name="log2", function=safe_log2, precedence=5, arity=1, symbol="log2", latex_symbol=r"\log_2(x)", cost=0.3799
+            name="log2", function=safe_log2, precedence=5, arity=1, symbol="log2", latex_symbol=r"\log_2(x)", cost=0.3967
         )
         self.operators["log10"] = OperatorSpec(
-            name="log10", function=safe_log10, precedence=5, arity=1, symbol="log10", latex_symbol=r"\log_{10}(x)", cost=0.4075
+            name="log10", function=safe_log10, precedence=5, arity=1, symbol="log10", latex_symbol=r"\log_{10}(x)", cost=0.4175
         )
         self.operators["sqrt"] = OperatorSpec(
-            name="sqrt", function=safe_sqrt, precedence=5, arity=1, symbol="sqrt", latex_symbol=r"\sqrt{x}", cost=0.1544
+            name="sqrt", function=safe_sqrt, precedence=5, arity=1, symbol="sqrt", latex_symbol=r"\sqrt{x}", cost=0.1693
         )
         self.operators["exp"] = OperatorSpec(
-            name="exp", function=safe_exp, precedence=5, arity=1, symbol="exp", latex_symbol=r"e^{x}", cost=0.3345
+            name="exp", function=safe_exp, precedence=5, arity=1, symbol="exp", latex_symbol=r"e^{x}", cost=0.3414
         )
         self.operators["sin"] = OperatorSpec(
-            name="sin", function=np.sin, precedence=5, arity=1, symbol="sin", latex_symbol=r"\sin(x)", cost=0.7078
+            name="sin", function=np.sin, precedence=5, arity=1, symbol="sin", latex_symbol=r"\sin(x)", cost=0.7198
         )
         self.operators["cos"] = OperatorSpec(
-            name="cos", function=np.cos, precedence=5, arity=1, symbol="cos", latex_symbol=r"\cos(x)", cost=0.7157
+            name="cos", function=np.cos, precedence=5, arity=1, symbol="cos", latex_symbol=r"\cos(x)", cost=0.7194
         )
         self.operators["tan"] = OperatorSpec(
-            name="tan", function=np.tan, precedence=5, arity=1, symbol="tan", latex_symbol=r"\tan(x)", cost=0.4139
+            name="tan", function=np.tan, precedence=5, arity=1, symbol="tan", latex_symbol=r"\tan(x)", cost=0.4061
         )
         self.operators["tanh"] = OperatorSpec(
-            name="tanh", function=np.tanh, precedence=5, arity=1, symbol="tanh", latex_symbol=r"\tanh(x)", cost=0.3118
+            name="tanh", function=np.tanh, precedence=5, arity=1, symbol="tanh", latex_symbol=r"\tanh(x)", cost=0.3009
         )
 
     def _define_binary_operators(self):
         """Defines binary operators."""
         self.operators["add"] = OperatorSpec(
-            name="add", function=np.add, precedence=1, arity=2, symbol="+", latex_symbol="+", cost=0.0595
+            name="add", function=np.add, precedence=1, arity=2, symbol="+", latex_symbol="+", cost=0.0632
         )
         self.operators["sub"] = OperatorSpec(
-            name="sub", function=np.subtract, precedence=1, arity=2, symbol="-", latex_symbol="-", cost=0.0591
+            name="sub", function=np.subtract, precedence=1, arity=2, symbol="-", latex_symbol="-", cost=0.0636
         )
         self.operators["mul"] = OperatorSpec(
-            name="mul", function=np.multiply, precedence=2, arity=2, symbol="*", latex_symbol=r"\times", cost=0.0595
+            name="mul", function=np.multiply, precedence=2, arity=2, symbol="*", latex_symbol=r"\times", cost=0.0631
         )
         self.operators["div"] = OperatorSpec(
-            name="div", function=safe_divide, precedence=2, arity=2, symbol="/", latex_symbol=r"\div", cost=0.1533
+            name="div", function=safe_divide, precedence=2, arity=2, symbol="/", latex_symbol=r"\div", cost=0.1500
         )
         self.operators["pow"] = OperatorSpec(
             name="pow", function=safe_power, precedence=3, arity=2, symbol="^", latex_symbol="^", cost=0.8958
         )
         self.operators["min"] = OperatorSpec(
-            name="min", function=lambda x, y: np.minimum(x, y), precedence=1, arity=2, symbol="min", latex_symbol=r"\min(x, y)", cost=0.0611
+            name="min", function=lambda x, y: np.minimum(x, y), precedence=1, arity=2, symbol="min", latex_symbol=r"\min(x, y)", cost=0.0608
         )
         self.operators["max"] = OperatorSpec(
-            name="max", function=lambda x, y: np.maximum(x, y), precedence=1, arity=2, symbol="max", latex_symbol=r"\max(x, y)", cost=0.0637
+            name="max", function=lambda x, y: np.maximum(x, y), precedence=1, arity=2, symbol="max", latex_symbol=r"\max(x, y)", cost=0.0618
         )
         self.operators["hypot"] = OperatorSpec(
-            name="hypot", function=np.hypot, precedence=2, arity=2, symbol="hypot", latex_symbol=r"\hypot(x, y)", cost=0.2068
+            name="hypot", function=np.hypot, precedence=2, arity=2, symbol="hypot", latex_symbol=r"\hypot(x, y)", cost=0.2008
         )
         self.operators["mod"] = OperatorSpec(
             name="mod", function=lambda x, y: np.mod(x, y), precedence=2, arity=2, symbol="%", latex_symbol=r"x \mod y", cost=1.0000
         )
         self.operators["pow2"] = OperatorSpec(
-            name="pow2", function=lambda x: np.power(x, 2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0568
+            name="pow2", function=lambda x: x * x, precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
         )
         self.operators["pow3"] = OperatorSpec(
-            name="pow3", function=lambda x: np.power(x, 3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.6975
+            name="pow3", function=lambda x: x * x * x, precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
         )
-        self.operators["pow4"] = OperatorSpec(
-            name="pow4", function=lambda x: np.power(x, 4), precedence=3, arity=1, symbol="pow4", latex_symbol=r"x^4", cost=0.6982
-        )
-        self.operators["pow5"] = OperatorSpec(
-            name="pow5", function=lambda x: np.power(x, 5), precedence=3, arity=1, symbol="pow5", latex_symbol=r"x^5", cost=0.6811
-        )
-
 
     def get_sorted_operators(self, by: str = "cost") -> Dict[str, OperatorSpec]:
         """
