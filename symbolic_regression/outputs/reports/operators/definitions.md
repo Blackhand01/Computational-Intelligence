@@ -53,7 +53,7 @@ Un albero equivalente che utilizza `pow2` e `pow3`:
 
 ### **Vantaggi**
 1. **Riduzione della complessità**: Alberi più compatti.
-2. **Efficienza computazionale**: Calcoli più veloci con operatori specifici (es. $x * x$ rispetto a `np.power(x, 2)`).
+2. **Efficienza computazionale**: Calcoli più veloci con operatori unari.
 
 ---
 

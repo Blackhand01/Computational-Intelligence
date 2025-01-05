@@ -106,7 +106,7 @@ class OperatorSet:
     def _define_unary_operators(self):
         """Defines unary operators."""
         self.operators["neg"] = OperatorSpec(
-            name="neg", function=lambda x: -x, precedence=4, arity=1, symbol="-", latex_symbol="-", cost=0.0520
+            name="neg", function=np.negative, precedence=4, arity=1, symbol="-", latex_symbol="-", cost=0.0520
         )
         self.operators["abs"] = OperatorSpec(
             name="abs", function=np.abs, precedence=4, arity=1, symbol="abs", latex_symbol="|x|", cost=0.0458
@@ -169,10 +169,10 @@ class OperatorSet:
             name="mod", function=lambda x, y: np.mod(x, y), precedence=2, arity=2, symbol="%", latex_symbol=r"x \mod y", cost=1.0000
         )
         self.operators["pow2"] = OperatorSpec(
-            name="pow2", function=lambda x: x * x, precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
+            name="pow2", function=np.pow(2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
         )
         self.operators["pow3"] = OperatorSpec(
-            name="pow3", function=lambda x: x * x * x, precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
+            name="pow3", function=np.pow(3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
         )
 
     def get_sorted_operators(self, by: str = "cost") -> Dict[str, OperatorSpec]:
