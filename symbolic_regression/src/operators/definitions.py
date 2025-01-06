@@ -1,5 +1,6 @@
 from typing import Callable, Dict, NamedTuple, Optional
 import numpy as np
+from sympy import Function, sympify
 
 # Global Constants
 MAX_EXP = 10
@@ -63,6 +64,24 @@ class OperatorSpec(NamedTuple):
     symbol: str
     latex_symbol: Optional[str] = None
     cost: float = 1.0  # Default cost
+    
+    def to_sympy(self, *args):
+        """
+        Converte l'operatore in un'espressione SymPy.
+
+        Args:
+            *args: Operandi per l'operatore.
+
+        Returns:
+            Any: Espressione SymPy.
+        """
+        if self.arity == 1:
+            return getattr(sympify("sympy"), self.name)(args[0])
+        elif self.arity == 2:
+            return getattr(sympify("sympy"), self.name)(args[0], args[1])
+        else:
+            raise ValueError(f"Arity non supportata per SymPy: {self.arity}")
+
 
 
 class OperatorSet:
@@ -138,6 +157,12 @@ class OperatorSet:
         self.operators["tanh"] = OperatorSpec(
             name="tanh", function=np.tanh, precedence=5, arity=1, symbol="tanh", latex_symbol=r"\tanh(x)", cost=0.3009
         )
+        self.operators["pow2"] = OperatorSpec(
+        name="pow2", function=lambda x: np.power(x, 2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
+        )
+        self.operators["pow3"] = OperatorSpec(
+            name="pow3", function=lambda x: np.power(x, 3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
+        )
 
     def _define_binary_operators(self):
         """Defines binary operators."""
@@ -168,12 +193,7 @@ class OperatorSet:
         self.operators["mod"] = OperatorSpec(
             name="mod", function=lambda x, y: np.mod(x, y), precedence=2, arity=2, symbol="%", latex_symbol=r"x \mod y", cost=1.0000
         )
-        self.operators["pow2"] = OperatorSpec(
-            name="pow2", function=np.pow(2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
-        )
-        self.operators["pow3"] = OperatorSpec(
-            name="pow3", function=np.pow(3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
-        )
+      
 
     def get_sorted_operators(self, by: str = "cost") -> Dict[str, OperatorSpec]:
         """

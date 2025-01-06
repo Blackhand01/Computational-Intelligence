@@ -7,8 +7,24 @@ symbolic_regression/
     logging_config.yaml
     genetic_config.yaml
   docs/
+    model.md
     trees.md
+    rl_model.md
   logs/
+    project_log_20250106_143741.log
+    project_log_20250106_145346.log
+    project_log_20250106_145026.log
+    project_log_20250106_145230.log
+    project_log_20250106_145152.log
+    project_log_20250106_134225.log
+    project_log_20250106_145345.log
+    project_log_20250106_145340.log
+    project_log_20250106_145343.log
+    project_log_20250106_135051.log
+    project_log_20250106_143706.log
+    project_log_20250106_134339.log
+    project_log_20250106_143835.log
+    project_log_20250106_133644.log
   scripts/
     trace_code.py
     collected_code.txt
@@ -16,27 +32,42 @@ symbolic_regression/
     pyvenv.cfg
     bin/
       pyftsubset
+      jupyter-run
       Activate.ps1
       python3
       ttx
       python
+      debugpy
       pip3
+      ipython
       activate.fish
+      isympy
       fonttools
       python3.11
       f2py
+      ipython3
       pip
+      tqdm
       pip3.11
+      jupyter-troubleshoot
+      pygmentize
+      jupyter-migrate
       activate
       numpy-config
+      jupyter-kernelspec
+      jupyter-kernel
+      jupyter
       pyftmerge
       activate.csh
     include/
       python3.11/
+    etc/
+      jupyter/
     lib/
       python3.11/
     share/
       man/
+      jupyter/
   data/
     processed/
     raw/
@@ -53,7 +84,9 @@ symbolic_regression/
     .DS_Store
     models/
     plots/
+      fitness_history.png
       problem_0_distribution.png
+      3d_plot.png
     reports/
       .DS_Store
       operators/
@@ -72,15 +105,25 @@ symbolic_regression/
     core/
       tree.py
       __init__.py
-      genetic_program.py
+      dynamic_strategies.py
       fitness.py
+      genetic_programming.py
+      __pycache__/
+        fitness.cpython-311.pyc
+        tree.cpython-311.pyc
+        dynamic_strategies.cpython-311.pyc
+        genetic_programming.cpython-311.pyc
+        __init__.cpython-311.pyc
     operators/
       definitions.py
+      local_search.py
       mutation.py
       __init__.py
       crossover.py
       __pycache__/
         benchmark.cpython-311.pyc
+        mutation.cpython-311.pyc
+        crossover.cpython-311.pyc
         __init__.cpython-311.pyc
         definitions.cpython-311.pyc
     utils/
@@ -92,10 +135,15 @@ symbolic_regression/
       random.py
       __pycache__/
         benchmark.cpython-311.pyc
+        logging_config.cpython-311.pyc
+        plotting.cpython-311.pyc
         __init__.cpython-311.pyc
     __pycache__/
       main.cpython-311.pyc
       __init__.cpython-311.pyc
+    meta_rl/
+      __init__.py
+      meta_rl_manager.py
     preprocessing/
       data_loader.py
       splitter.py
@@ -115,46 +163,733 @@ Repository Code Collection
 
 
 # File: main.py
-# Number of Lines: 19
-from symbolic_regression.src.utils.benchmark import run_benchmark
-from operators.definitions import operator_set
-import sys
-print("\n".join(sys.path))
+# Number of Lines: 72
+import numpy as np
+from tqdm import tqdm
+from src.utils.logging_config import setup_logging
+from src.core.genetic_programming import GeneticProgram
+from src.core.fitness import FitnessEvaluator
+from src.utils.plotting import plot_fitness_history, visualize_formula, plot_prediction_vs_actual, plot_error
+from src.preprocessing.data_loader import load_npz_file
+from src.preprocessing.splitter import split_dataset
 
-def print_sorted_operators():
-    """
-    Stampa gli operatori ordinati per costo in ordine crescente, numerandoli.
-    """
-    sorted_operators = operator_set.get_sorted_operators(by="cost")
-    print("Classifica degli operatori per costo crescente:\n")
-    for rank, (name, op) in enumerate(sorted_operators.items(), start=1):
-        print(f"{rank}. {name.capitalize()} - Cost: {op.cost:.6f} s")
+def main():
+    # Setup logging
+    logger = setup_logging(log_dir="logs", log_level="DEBUG")
+    logger.info("Starting symbolic regression process...")
 
-# Esegui il benchmark per aggiornare i costi
-run_benchmark()
+    # Load dataset
+    logger.info("Loading dataset...")
+    dataset_path = "data/raw/problem_0.npz"  # Update the path if needed
+    dataset = load_npz_file(dataset_path, debug=True)
 
-# Stampa la classifica
-print_sorted_operators()
+    # Split dataset into training and test sets
+    logger.info("Splitting dataset into training and test sets...")
+    train_set, test_set = split_dataset(dataset, train_size=0.8, shuffle=True)
+
+    # Initialize fitness evaluator
+    logger.info("Initializing fitness evaluator...")
+    fitness_evaluator = FitnessEvaluator(
+        target_function=lambda x: train_set["y"],  # Use training labels
+        alpha=0.01  # Regularization for parsimony
+    )
+
+    # Setup Genetic Programming
+    logger.info("Initializing genetic programming...")
+    gp = GeneticProgram(
+        population_size=50,
+        max_generations=50,
+        max_tree_depth=6,
+        mutation_rate=0.3,   # Initial mutation rate
+        crossover_rate=0.7,  # Initial crossover rate
+        fitness_evaluator=fitness_evaluator,
+    )
+
+    # Run the Genetic Programming algorithm
+    logger.info("Starting genetic programming evolution...")
+    best_individual = gp.run(train_set["x"])
+
+    # Evaluate the best individual on the test set
+    logger.info("Evaluating the best individual on the test set...")
+    test_fitness = fitness_evaluator.fitness(best_individual, test_set["x"])
+    logger.info(f"Best individual's fitness on the test set: {test_fitness:.6f}")
+
+    # Save fitness history plot
+    logger.info("Saving fitness history plot...")
+    fitness_history = gp.fitness_scores  # Retrieve fitness scores from the GeneticProgram class
+    plot_fitness_history(fitness_history, file_name="fitness_history.png")
+
+    # Visualize the formula
+    logger.info("Visualizing the formula...")
+    formula, latex_formula = visualize_formula(best_individual)
+    logger.info(f"Best individual formula (LaTeX): {latex_formula}")
+
+    # Plot predictions vs actual values
+    logger.info("Plotting predictions vs actual values...")
+    plot_prediction_vs_actual(best_individual, test_set["x"], test_set["y"], file_name="prediction_vs_actual.png")
+
+    # Plot error distribution
+    logger.info("Plotting error distribution...")
+    plot_error(best_individual, test_set["x"], test_set["y"], file_name="error_distribution.png")
+
+    logger.info("Symbolic regression process completed successfully.")
+
+if __name__ == "__main__":
+    main()
 
 
 # File: core/tree.py
-# Number of Lines: 0
+# Number of Lines: 234
+import numpy as np
+from typing import List, Optional, Union
+from src.operators.definitions import OperatorSpec, OperatorSet
+import random
+
+# Initialize the operator set
+operator_set = OperatorSet()
+
+# Separate unary and binary operators for ease of use
+UNARY_OPERATORS = operator_set.get_unary_operators()
+BINARY_OPERATORS = operator_set.get_binary_operators()
+
+
+class Node:
+    """
+    Represents a node in a syntax tree.
+    """
+    def __init__(self, operator: OperatorSpec, left: Optional["Node"] = None, right: Optional["Node"] = None):
+        self.operator = operator
+        self.left = left
+        self.right = right
+
+    def is_leaf(self) -> bool:
+        """Determines if the node is a leaf."""
+        return self.left is None and self.right is None
+
+    def evaluate(self, x: np.ndarray) -> np.ndarray:
+        """
+        Recursively evaluates the node and its children.
+
+        Args:
+            x (np.ndarray): Input array to evaluate.
+
+        Returns:
+            np.ndarray: Evaluation result of the subtree.
+        """
+        if self.is_leaf():
+            return self.operator.function(x)  # Unary operator for leaves
+        left_val = self.left.evaluate(x) if self.left else None
+        right_val = self.right.evaluate(x) if self.right else None
+        return self.operator.function(left_val, right_val)  # Binary or unary
+
+    def mutate_value(self) -> None:
+        """
+        Changes the operator of the node, selecting a new one of the same arity (1 or 2).
+        """
+        current_arity = self.operator.arity
+        if current_arity == 1:
+            self.operator = random.choice(list(UNARY_OPERATORS.values()))
+        else:
+            self.operator = random.choice(list(BINARY_OPERATORS.values()))
+
+
+class Tree:
+    """
+    Represents a syntax tree for symbolic regression.
+    """
+    def __init__(self, root: Node):
+        self.root = root
+
+    def __str__(self):
+        return self._to_string(self.root)
+
+    def _to_string(self, node):
+        if not node:
+            return ""
+        if node.is_leaf():
+            return f"{node.operator.symbol}"
+        left_str = self._to_string(node.left)
+        right_str = self._to_string(node.right)
+        return f"({left_str} {node.operator.symbol} {right_str})"
+
+    def traverse(self) -> List[Node]:
+        """
+        Returns a list of all nodes in the tree in traversal order.
+
+        Returns:
+            List[Node]: Nodes in the tree.
+        """
+        nodes = []
+
+        def _traverse(node):
+            if node:
+                nodes.append(node)
+                _traverse(node.left)
+                _traverse(node.right)
+
+        _traverse(self.root)
+        return nodes
+
+    def random_node(self, allow_root: bool = True) -> Node:
+        """
+        Selects a random node in the tree.
+
+        Args:
+            allow_root (bool): Whether to include the root in the selection.
+
+        Returns:
+            Node: Randomly selected node.
+        """
+        nodes = self.traverse()
+        if not allow_root:
+            nodes = nodes[1:]  # Exclude the root
+        return random.choice(nodes)
+
+    def replace_subtree(self, target_node: Node, new_subtree: Node) -> None:
+        """
+        Replaces a subtree with a new node.
+
+        Args:
+            target_node (Node): Node to replace.
+            new_subtree (Node): New node or subtree.
+        """
+        def _replace(node, parent, is_left):
+            if node is target_node:
+                if is_left:
+                    parent.left = new_subtree
+                else:
+                    parent.right = new_subtree
+                return True
+            if node.left and _replace(node.left, node, True):
+                return True
+            if node.right and _replace(node.right, node, False):
+                return True
+            return False
+
+        if self.root is target_node:
+            self.root = new_subtree
+        else:
+            _replace(self.root, None, False)
+
+    def size(self) -> int:
+        """
+        Returns the total number of nodes in the tree.
+
+        Returns:
+            int: Number of nodes.
+        """
+        return len(self.traverse())
+
+    def depth(self) -> int:
+        """
+        Calculates the maximum depth of the tree.
+
+        Returns:
+            int: Depth of the tree.
+        """
+        def _depth(node):
+            if not node:
+                return 0
+            return 1 + max(_depth(node.left), _depth(node.right))
+
+        return _depth(self.root)
+
+    def copy(self) -> "Tree":
+        """
+        Creates a copy of the tree.
+
+        Returns:
+            Tree: Copy of the tree.
+        """
+        def _copy(node):
+            if not node:
+                return None
+            return Node(
+                operator=node.operator,
+                left=_copy(node.left),
+                right=_copy(node.right),
+            )
+
+        return Tree(_copy(self.root))
+
+    @staticmethod
+    def generate_random_tree(max_depth: int, operator_set: Union[str, List[OperatorSpec]] = "basic") -> "Tree":
+        """
+        Generates a random tree with a specified maximum depth.
+
+        Args:
+            max_depth (int): Maximum depth of the tree.
+            operator_set (Union[str, List[OperatorSpec]]): Set of operators to use.
+
+        Returns:
+            Tree: Randomly generated tree.
+        """
+        def _generate_node(depth):
+            if depth == max_depth or np.random.rand() < 0.3:
+                operator = random.choice([op for op in UNARY_OPERATORS.values()])
+                return Node(operator)
+
+            operator = random.choice([op for op in BINARY_OPERATORS.values()])
+            return Node(
+                operator=operator,
+                left=_generate_node(depth + 1),
+                right=_generate_node(depth + 1),
+            )
+
+        return Tree(_generate_node(0))
+    
+
+
+def validate_tree(tree: Tree, max_tree_depth: int = 10, max_nodes: int = 100) -> bool:
+    """
+    Validates a tree for structural and computational correctness.
+
+    Args:
+        tree (Tree): Tree to validate.
+        max_tree_depth (int): Maximum allowed depth.
+        max_nodes (int): Maximum allowed number of nodes.
+
+    Returns:
+        bool: True if the tree is valid, False otherwise.
+    """
+    try:
+        if tree.root is None:
+            return False  # Root must be valid
+
+        if tree.depth() > max_tree_depth:
+            return False  # Check maximum depth
+
+        if tree.size() > max_nodes:
+            return False  # Check maximum number of nodes
+
+        # Test evaluation with random input
+        test_input = np.random.rand(10, 1)  # Random input
+        result = tree.root.evaluate(test_input)
+
+        # Check if result is numerically valid
+        if not np.all(np.isfinite(result)):
+            return False
+
+        return True
+    except Exception as e:
+        print(f"Validation failed: {e}")
+        return False
 
 
 # File: core/__init__.py
 # Number of Lines: 0
 
 
-# File: core/genetic_program.py
-# Number of Lines: 0
+# File: core/dynamic_strategies.py
+# Number of Lines: 71
+# File: src/core/dynamic_strategies.py
+
+import numpy as np
+from typing import List
+from src.core.tree import Tree
+
+def population_diversity(population: List[Tree]) -> float:
+    """
+    Calcola una misura di diversità basata sulla variazione delle dimensioni degli alberi.
+    Puoi sostituire questa metrica con altre più sofisticate, come la distanza strutturale.
+    
+    Args:
+        population (List[Tree]): Lista di alberi nella popolazione.
+    
+    Returns:
+        float: Misura di diversità normalizzata tra 0 e 1.
+    """
+    sizes = [ind.size() for ind in population]
+    if not sizes:
+        return 0.0
+    max_size = max(sizes)
+    min_size = min(sizes)
+    diversity = (max_size - min_size) / (max_size + 1e-9)  # Evita divisioni per zero
+    return diversity
+
+def choose_mutation(population: List[Tree], fitness_scores: List[float], generation: int, max_generations: int) -> str:
+    """
+    Seleziona dinamicamente la strategia di mutazione basata su diversità, complessità e generazione corrente.
+    
+    Args:
+        population (List[Tree]): Lista di alberi nella popolazione.
+        fitness_scores (List[float]): Lista dei punteggi di fitness corrispondenti.
+        generation (int): Numero della generazione corrente.
+        max_generations (int): Numero massimo di generazioni.
+    
+    Returns:
+        str: Nome della strategia di mutazione selezionata.
+    """
+    diversity = population_diversity(population)
+    avg_fitness = np.mean(fitness_scores) if fitness_scores else float("inf")
+    complexity = np.mean([tree.size() for tree in population]) if population else 0
+
+    if diversity < 0.3:
+        return "subtree"  # Aumenta la diversità sostituendo sottoalberi
+    elif complexity > 50:
+        return "shrink"   # Controlla la complessità riducendo la dimensione
+    elif generation > 0.8 * max_generations:
+        return "point"    # Raffina le soluzioni nelle fasi finali
+    else:
+        return "hoist"    # Esplora nuovi spazi
+
+def choose_crossover(population: List[Tree], generation: int, max_generations: int) -> str:
+    """
+    Seleziona dinamicamente la strategia di crossover basata su diversità e generazione corrente.
+    
+    Args:
+        population (List[Tree]): Lista di alberi nella popolazione.
+        generation (int): Numero della generazione corrente.
+        max_generations (int): Numero massimo di generazioni.
+    
+    Returns:
+        str: Nome della strategia di crossover selezionata.
+    """
+    diversity = population_diversity(population)
+
+    if diversity > 0.5 and generation < 0.5 * max_generations:
+        return "subtree"   # Fase di esplorazione: subtree crossover
+    elif generation > 0.5 * max_generations:
+        return "uniform"   # Fase di sfruttamento: uniform crossover
+    else:
+        return "size_limit"  # Controllo della complessità: size limit crossover
 
 
 # File: core/fitness.py
-# Number of Lines: 0
+# Number of Lines: 113
+# File: src/core/fitness.py
+
+import numpy as np
+from typing import Callable, List
+from src.core.tree import Tree
+
+class FitnessEvaluator:
+    """
+    Classe per valutare il fitness degli alberi in una popolazione, con supporto
+    per target personalizzati e penalizzazioni basate sulla complessità.
+    """
+    def __init__(self, target_function: Callable[[np.ndarray], np.ndarray], alpha: float = 0.01):
+        """
+        Inizializza il valutatore di fitness.
+
+        Args:
+            target_function (Callable[[np.ndarray], np.ndarray]): Funzione target per generare i valori attesi.
+            alpha (float): Fattore di penalizzazione per la complessità dell'albero.
+        """
+        self.target_function = target_function
+        self.alpha = alpha
+
+    def mse(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+        """
+        Calcola l'errore quadratico medio tra valori attesi e predetti.
+
+        Args:
+            y_true (np.ndarray): Valori attesi.
+            y_pred (np.ndarray): Valori predetti.
+
+        Returns:
+            float: Errore quadratico medio.
+        """
+        return np.mean((y_true - y_pred) ** 2)
+
+    def parsimony_penalty(self, tree: Tree) -> float:
+        """
+        Calcola una penalizzazione per alberi di grandi dimensioni.
+
+        Args:
+            tree (Tree): Albero da valutare.
+
+        Returns:
+            float: Penalizzazione basata sulla dimensione dell'albero.
+        """
+        return self.alpha * tree.size()
+
+    def fitness(self, tree: Tree, x: np.ndarray) -> float:
+        """
+        Calcola il valore di fitness per un albero, considerando sia l'accuratezza
+        che una penalizzazione per complessità eccessiva.
+
+        Args:
+            tree (Tree): Albero da valutare.
+            x (np.ndarray): Input del dataset.
+
+        Returns:
+            float: Valore di fitness (più basso è meglio).
+        """
+        try:
+            y_true = self.target_function(x)
+            y_pred = tree.root.evaluate(x)
+            mse_error = self.mse(y_true, y_pred)
+            penalty = self.parsimony_penalty(tree)
+            return mse_error + penalty
+        except Exception as e:
+            # Penalizza drasticamente gli alberi che non possono essere valutati
+            print(f"Errore durante la valutazione dell'albero: {e}")
+            return float("inf")
+
+    def evaluate_population(self, population: List[Tree], x: np.ndarray) -> List[float]:
+        """
+        Valuta l'intera popolazione e restituisce una lista di punteggi di fitness.
+
+        Args:
+            population (List[Tree]): Lista di alberi da valutare.
+            x (np.ndarray): Input del dataset.
+
+        Returns:
+            List[float]: Lista dei punteggi di fitness per ogni albero.
+        """
+        fitness_scores = []
+        for tree in population:
+            fitness_score = self.fitness(tree, x)
+            fitness_scores.append(fitness_score)
+        return fitness_scores
+    
+def validate_fitness_scores(fitness_scores: list) -> bool:
+    """
+    Validates fitness scores for structural correctness.
+
+    Args:
+        fitness_scores (list): List of fitness scores to validate.
+
+    Returns:
+        bool: True if the scores are valid, False otherwise.
+    """
+    try:
+        # Convert to NumPy array
+        fitness_scores = np.array(fitness_scores, dtype=np.float64)
+
+        # Check for NaN or infinite values
+        if not np.all(np.isfinite(fitness_scores)):
+            return False
+
+        # Optional: enforce non-negative fitness scores
+        if np.any(fitness_scores < 0):
+            return False
+
+        return True
+    except Exception as e:
+        print(f"Error during fitness score validation: {e}")
+        return False
+
+
+# File: core/genetic_programming.py
+# Number of Lines: 212
+import numpy as np
+from typing import List, Tuple
+from src.core.tree import Tree, validate_tree
+from src.operators.crossover import CrossoverOperator
+from src.operators.mutation import MutationOperator
+from src.core.fitness import FitnessEvaluator, validate_fitness_scores
+from src.core.dynamic_strategies import choose_crossover, choose_mutation
+
+class GeneticProgram:
+    """
+    Gestisce il ciclo evolutivo di un sistema di programmazione genetica.
+    """
+    def __init__(
+        self,
+        population_size: int,
+        max_generations: int,
+        max_tree_depth: int,
+        mutation_rate: float,
+        crossover_rate: float,
+        fitness_evaluator: FitnessEvaluator,
+        max_nodes: int = 100,
+    ):
+        """
+        Inizializza il sistema di programmazione genetica.
+
+        Args:
+            population_size (int): Dimensione della popolazione.
+            max_generations (int): Numero massimo di generazioni.
+            max_tree_depth (int): Profondità massima degli alberi.
+            mutation_rate (float): Probabilità di mutazione.
+            crossover_rate (float): Probabilità di crossover.
+            fitness_evaluator (FitnessEvaluator): Oggetto per la valutazione del fitness.
+            max_nodes (int): Numero massimo di nodi consentiti per albero.
+        """
+        self.population_size = population_size
+        self.max_generations = max_generations
+        self.max_tree_depth = max_tree_depth
+        self.initial_mutation_rate = mutation_rate  # Salva il valore iniziale
+        self.initial_crossover_rate = crossover_rate  # Salva il valore iniziale
+        self.fitness_evaluator = fitness_evaluator
+        self.max_nodes = max_nodes
+
+        self.population: List[Tree] = []
+        self.fitness_scores: List[float] = []
+
+        # Operatori di crossover e mutazione
+        self.crossover_operator = CrossoverOperator()
+        self.mutation_operator = MutationOperator()
+
+    def initialize_population(self) -> None:
+        """
+        Genera la popolazione iniziale di alberi casuali, validando ciascun albero.
+        """
+        self.population = []
+        while len(self.population) < self.population_size:
+            tree = Tree.generate_random_tree(max_depth=self.max_tree_depth, operator_set="basic")
+            if validate_tree(tree, max_tree_depth=self.max_tree_depth, max_nodes=self.max_nodes):
+                self.population.append(tree)
+
+    def evaluate_population(self, x: np.ndarray) -> None:
+        """
+        Calcola la fitness per ogni individuo nella popolazione.
+
+        Args:
+            x (np.ndarray): Input del dataset per la valutazione del fitness.
+        """
+        self.fitness_scores = self.fitness_evaluator.evaluate_population(self.population, x)
+
+    def select_parents(self) -> Tuple[Tree, Tree]:
+        """
+        Selects two parents from the population using fitness-proportional selection.
+
+        Returns:
+            Tuple[Tree, Tree]: Two parent trees.
+        """
+        if not validate_fitness_scores(self.fitness_scores):
+            print("Warning: Invalid fitness scores detected. Attempting to fix...")
+            # Azione correttiva 1: Ricalcolare i punteggi di fitness
+            try:
+                self.evaluate_population(x)
+            except Exception as e:
+                print(f"Error during fitness recalculation: {e}")
+                # Azione correttiva 2: Sostituire valori non validi con fallback
+                self.fitness_scores = np.nan_to_num(self.fitness_scores, nan=float('inf'), posinf=float('inf'), neginf=float('inf'))
+
+        # Dopo la correzione, verifica di nuovo i punteggi
+        if not validate_fitness_scores(self.fitness_scores):
+            raise ValueError("Fitness scores are still invalid after correction.")
+
+        probabilities = 1.0 / (np.array(self.fitness_scores) + 1e-10)  # Avoid division by zero
+        probabilities /= probabilities.sum()
+        parent_indices = np.random.choice(len(self.population), size=2, p=probabilities, replace=False)
+        return self.population[parent_indices[0]], self.population[parent_indices[1]]
+
+
+        
+    def apply_crossover(self, parent1: Tree, parent2: Tree, crossover_strategy: str) -> Tuple[Tree, Tree]:
+        """
+        Applica crossover tra due genitori usando la strategia specificata.
+
+        Args:
+            parent1 (Tree): Primo genitore.
+            parent2 (Tree): Secondo genitore.
+            crossover_strategy (str): Strategia di crossover da applicare.
+
+        Returns:
+            Tuple[Tree, Tree]: Due nuovi alberi figli validati.
+        """
+        kwargs = {}
+        if crossover_strategy == "size_limit":
+            kwargs["max_size"] = self.max_nodes
+
+        child1, child2 = self.crossover_operator.apply(parent1, parent2, strategy=crossover_strategy, **kwargs)
+        if not validate_tree(child1, max_tree_depth=self.max_tree_depth, max_nodes=self.max_nodes):
+            child1 = parent1.copy()
+        if not validate_tree(child2, max_tree_depth=self.max_tree_depth, max_nodes=self.max_nodes):
+            child2 = parent2.copy()
+        return child1, child2
+
+
+    def apply_mutation(self, tree: Tree, mutation_strategy: str) -> Tree:
+        """
+        Applica mutazione a un albero usando la strategia specificata.
+
+        Args:
+            tree (Tree): Albero su cui applicare la mutazione.
+            mutation_strategy (str): Strategia di mutazione da applicare.
+
+        Returns:
+            Tree: Albero mutato validato.
+        """
+        kwargs = {}
+        if mutation_strategy == "subtree":
+            kwargs["max_depth"] = self.max_tree_depth
+
+        mutated_tree = self.mutation_operator.apply(tree, strategy=mutation_strategy, **kwargs)
+        if not validate_tree(mutated_tree, max_tree_depth=self.max_tree_depth, max_nodes=self.max_nodes):
+            return tree.copy()
+        return mutated_tree
+
+
+    def evolve_population(self, x: np.ndarray, current_generation: int) -> None:
+        """
+        Evolve la popolazione corrente per una generazione utilizzando strategie dinamiche.
+
+        Args:
+            x (np.ndarray): Input del dataset per la valutazione del fitness.
+            current_generation (int): Numero della generazione corrente.
+        """
+        new_population = []
+        crossover_strategy = choose_crossover(self.population, current_generation, self.max_generations)
+        mutation_strategy = choose_mutation(self.population, self.fitness_scores, current_generation, self.max_generations)
+
+        while len(new_population) < self.population_size:
+            parent1, parent2 = self.select_parents()
+            child1, child2 = self.apply_crossover(parent1, parent2, crossover_strategy)
+            child1 = self.apply_mutation(child1, mutation_strategy)
+            child2 = self.apply_mutation(child2, mutation_strategy)
+
+            if validate_tree(child1, max_tree_depth=self.max_tree_depth, max_nodes=self.max_nodes):
+                new_population.append(child1)
+            if len(new_population) < self.population_size and validate_tree(child2, max_tree_depth=self.max_tree_depth, max_nodes=self.max_nodes):
+                new_population.append(child2)
+
+        self.population = new_population[:self.population_size]
+        self.evaluate_population(x)
+
+    def run(self, x: np.ndarray, max_no_improvement: int = 10) -> Tree:
+        """
+        Esegue l'intero ciclo evolutivo con strategie dinamiche.
+
+        Args:
+            x (np.ndarray): Input del dataset per la valutazione del fitness.
+            max_no_improvement (int): Numero massimo di generazioni senza miglioramenti.
+
+        Returns:
+            Tree: Miglior individuo trovato.
+        """
+        self.initialize_population()
+        self.evaluate_population(x)
+
+        if not validate_fitness_scores(self.fitness_scores):
+            print("Invalid fitness scores detected after initialization. Re-evaluating...")
+            self.evaluate_population(x)
+
+        best_fitness = min(self.fitness_scores)
+        best_individual = self.population[np.argmin(self.fitness_scores)]
+        no_improvement = 0
+
+        for generation in range(self.max_generations):
+            print(f"Generazione {generation + 1}/{self.max_generations}")
+            print(f"  Miglior fitness attuale: {best_fitness:.6f}")
+            if no_improvement >= max_no_improvement:
+                print("  Nessun miglioramento, fermo l'evoluzione.")
+                break
+
+            self.evolve_population(x, generation)
+
+            if not validate_fitness_scores(self.fitness_scores):
+                print("Invalid fitness scores detected during evolution. Re-evaluating...")
+                self.evaluate_population(x)
+
+            current_best_fitness = min(self.fitness_scores)
+            if current_best_fitness < best_fitness:
+                best_fitness = current_best_fitness
+                best_individual = self.population[np.argmin(self.fitness_scores)]
+                no_improvement = 0
+            else:
+                no_improvement += 1
+
+        print(f"Fitness migliore trovato: {best_fitness:.6f}")
+        return best_individual
 
 
 # File: operators/definitions.py
-# Number of Lines: 211
+# Number of Lines: 212
 from typing import Callable, Dict, NamedTuple, Optional
 import numpy as np
 
@@ -295,6 +1030,12 @@ class OperatorSet:
         self.operators["tanh"] = OperatorSpec(
             name="tanh", function=np.tanh, precedence=5, arity=1, symbol="tanh", latex_symbol=r"\tanh(x)", cost=0.3009
         )
+        self.operators["pow2"] = OperatorSpec(
+        name="pow2", function=lambda x: np.power(x, 2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
+        )
+        self.operators["pow3"] = OperatorSpec(
+            name="pow3", function=lambda x: np.power(x, 3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
+        )
 
     def _define_binary_operators(self):
         """Defines binary operators."""
@@ -325,12 +1066,7 @@ class OperatorSet:
         self.operators["mod"] = OperatorSpec(
             name="mod", function=lambda x, y: np.mod(x, y), precedence=2, arity=2, symbol="%", latex_symbol=r"x \mod y", cost=1.0000
         )
-        self.operators["pow2"] = OperatorSpec(
-            name="pow2", function=np.pow(2), precedence=3, arity=1, symbol="pow2", latex_symbol=r"x^2", cost=0.0441
-        )
-        self.operators["pow3"] = OperatorSpec(
-            name="pow3", function=np.pow(3), precedence=3, arity=1, symbol="pow3", latex_symbol=r"x^3", cost=0.0679
-        )
+      
 
     def get_sorted_operators(self, by: str = "cost") -> Dict[str, OperatorSpec]:
         """
@@ -368,16 +1104,449 @@ UNARY_OPERATORS = operator_set.get_unary_operators()
 BINARY_OPERATORS = operator_set.get_binary_operators()
 
 
-# File: operators/mutation.py
-# Number of Lines: 0
+# File: operators/local_search.py
+# Number of Lines: 167
+# File: src/operators/local_search.py
 
+import numpy as np
+import random
+from typing import Callable, Any, Optional
+from src.core.tree import Tree
+from src.core.fitness import FitnessEvaluator
+
+def simulated_annealing(
+    initial_solution: Tree,
+    fitness_function: Callable[[Tree], float],
+    max_iterations: int = 100,
+    initial_temperature: float = 100.0,
+    cooling_rate: float = 0.95
+) -> Tree:
+    """
+    Esegue Simulated Annealing (SA) su un singolo individuo (Tree).
+
+    Args:
+        initial_solution (Tree): Albero di partenza.
+        fitness_function (Callable[[Tree], float]): Funzione di fitness da minimizzare.
+        max_iterations (int): Numero massimo di iterazioni per la SA.
+        initial_temperature (float): Temperatura iniziale.
+        cooling_rate (float): Fattore di raffreddamento (es. 0.95).
+
+    Returns:
+        Tree: Soluzione (albero) ottimizzata localmente.
+    """
+    current_solution = initial_solution.copy()
+    current_fitness = fitness_function(current_solution)
+    best_solution = current_solution
+    best_fitness = current_fitness
+
+    temperature = initial_temperature
+
+    for i in range(max_iterations):
+        # Genera una soluzione vicina (neighbor)
+        neighbor = _small_perturbation(current_solution)
+        neighbor_fitness = fitness_function(neighbor)
+
+        # Calcola la variazione di costo
+        delta = neighbor_fitness - current_fitness
+
+        if delta < 0:
+            # Migliora => accetta sempre
+            current_solution = neighbor
+            current_fitness = neighbor_fitness
+            if neighbor_fitness < best_fitness:
+                best_solution = neighbor
+                best_fitness = neighbor_fitness
+        else:
+            # Peggiora => accetta con una certa probabilità dipendente dalla temperatura
+            acceptance_probability = np.exp(-delta / (temperature + 1e-9))
+            if random.random() < acceptance_probability:
+                current_solution = neighbor
+                current_fitness = neighbor_fitness
+
+        # Raffredda la temperatura
+        temperature *= cooling_rate
+
+    return best_solution
+
+
+def tabu_search(
+    initial_solution: Tree,
+    fitness_function: Callable[[Tree], float],
+    max_iterations: int = 100,
+    tabu_list_size: int = 10,
+    neighborhood_size: int = 5
+) -> Tree:
+    """
+    Esegue Tabu Search (TS) su un singolo individuo (Tree).
+
+    Args:
+        initial_solution (Tree): Albero iniziale.
+        fitness_function (Callable[[Tree], float]): Funzione di fitness da minimizzare.
+        max_iterations (int): Iterazioni massime della ricerca tabu.
+        tabu_list_size (int): Dimensione massima della lista Tabu.
+        neighborhood_size (int): Numero di vicini da generare ogni iterazione.
+
+    Returns:
+        Tree: Miglior albero trovato durante la TS.
+    """
+    current_solution = initial_solution.copy()
+    current_fitness = fitness_function(current_solution)
+    best_solution = current_solution
+    best_fitness = current_fitness
+
+    # In Tabu Search, la Tabu List contiene soluzioni (o mosse) da NON esplorare
+    # per evitare di tornare ripetutamente sugli stessi minimi.
+    tabu_list = []
+
+    for _ in range(max_iterations):
+        neighborhood = _generate_neighbors(current_solution, neighborhood_size)
+        
+        # Valutiamo ciascun vicino ignorando quelli in tabu_list
+        best_neighbor = None
+        best_neighbor_fitness = float("inf")
+
+        for neighbor in neighborhood:
+            # Identifica la "mosse" (o l'hash) per la tabu list
+            # (es. un ID semplificato della struttura)
+            neighbor_id = _solution_hash(neighbor)
+
+            if neighbor_id in tabu_list:
+                continue  # Skip se è tabù
+
+            neighbor_fitness = fitness_function(neighbor)
+            if neighbor_fitness < best_neighbor_fitness:
+                best_neighbor = neighbor
+                best_neighbor_fitness = neighbor_fitness
+
+        if best_neighbor is None:
+            # Se tutti i vicini sono tabu, "liberiamo" la taboo list o forziamo un break
+            tabu_list.clear()
+            continue
+
+        # Aggiornamento
+        current_solution = best_neighbor
+        current_fitness = best_neighbor_fitness
+
+        # Aggiorna il best globale
+        if current_fitness < best_fitness:
+            best_solution = current_solution
+            best_fitness = current_fitness
+
+        # Aggiorna la tabu list
+        tabu_list.append(_solution_hash(current_solution))
+        if len(tabu_list) > tabu_list_size:
+            tabu_list.pop(0)
+
+    return best_solution
+
+
+# ----------------------------- UTILITY FUNCTIONS ----------------------------- #
+
+def _small_perturbation(solution: Tree) -> Tree:
+    """
+    Genera una perturbazione locale dell'albero (Tree).
+    Esempio: mutazione puntuale o sostituzione di un singolo nodo.
+    """
+    new_tree = solution.copy()
+    # Esempio: mutazione "point" su un nodo a caso
+    random_node = new_tree.random_node(allow_root=False)
+    random_node.mutate_value()
+    return new_tree
+
+
+def _generate_neighbors(solution: Tree, k: int) -> list:
+    """
+    Genera k soluzioni vicine (neighbors) ad un albero principale.
+    Usando piccole perturbazioni multiple.
+    """
+    neighbors = []
+    for _ in range(k):
+        neighbor = _small_perturbation(solution)
+        neighbors.append(neighbor)
+    return neighbors
+
+
+def _solution_hash(solution: Tree) -> str:
+    """
+    Calcola un hash (stringa) rappresentativo della struttura dell'albero
+    per memorizzarlo in una tabu list. Qui, semplifichiamo a una stringa
+    testuale dell'albero (non sempre robusta, ma sufficiente come demo).
+    """
+    return str(solution)
+
+
+# File: operators/mutation.py
+# Number of Lines: 118
+import numpy as np
+from typing import Callable, Optional
+from src.core.tree import Tree, Node  # Presupponendo che Tree e Node siano definiti in tree.py
+
+def point_mutation(tree: Tree, mutation_rate: float = 0.1) -> Tree:
+    """
+    Modifica casualmente i nodi di un albero con una certa probabilità.
+
+    Args:
+        tree (Tree): Albero su cui applicare la mutazione.
+        mutation_rate (float): Probabilità di mutazione per ogni nodo.
+
+    Returns:
+        Tree: Albero mutato.
+    """
+    mutated_tree = tree.copy()
+    for node in mutated_tree.traverse():
+        if np.random.rand() < mutation_rate:
+            node.mutate_value()
+    return mutated_tree
+
+
+def subtree_mutation(tree: Tree, max_depth: int) -> Tree:
+    """
+    Sostituisce un sottoalbero con un nuovo sottoalbero generato casualmente.
+
+    Args:
+        tree (Tree): Albero su cui applicare la mutazione.
+        max_depth (int): Massima profondità del nuovo sottoalbero.
+
+    Returns:
+        Tree: Albero mutato.
+    """
+    mutated_tree = tree.copy()
+    mutation_point = mutated_tree.random_node()
+    new_subtree = Tree.generate_random_tree(max_depth=max_depth)
+    mutated_tree.replace_subtree(mutation_point, new_subtree.root)
+    return mutated_tree
+
+
+def hoist_mutation(tree: Tree) -> Tree:
+    """
+    Sostituisce l'intero albero con uno dei suoi sottoalberi, riducendo la dimensione complessiva.
+
+    Args:
+        tree (Tree): Albero su cui applicare la mutazione.
+
+    Returns:
+        Tree: Albero mutato.
+    """
+    mutated_tree = tree.copy()
+    mutation_point = mutated_tree.random_node()
+    mutated_tree.root = mutation_point  # Usa il sottoalbero come nuovo albero
+    return mutated_tree
+
+
+def shrink_mutation(tree: Tree, max_size: int) -> Tree:
+    """
+    Riduce la dimensione dell'albero rimuovendo rami o nodi non necessari.
+
+    Args:
+        tree (Tree): Albero su cui applicare la mutazione.
+        max_size (int): Dimensione massima desiderata.
+
+    Returns:
+        Tree: Albero mutato.
+    """
+    mutated_tree = tree.copy()
+    while mutated_tree.size() > max_size:
+        node_to_remove = mutated_tree.random_node(allow_root=False)
+        mutated_tree.prune(node_to_remove)
+    return mutated_tree
+
+
+class MutationOperator:
+    """
+    Classe per gestire diverse strategie di mutazione.
+    """
+    def __init__(self):
+        self.operators = {
+            "point": point_mutation,
+            "subtree": subtree_mutation,
+            "hoist": hoist_mutation,
+            "shrink": shrink_mutation,
+        }
+
+    def list_strategies(self) -> list:
+        """
+        Restituisce l'elenco delle strategie di mutazione disponibili.
+        
+        Returns:
+            list: Nomi delle strategie disponibili.
+        """
+        return list(self.operators.keys())
+
+    def apply(self, tree: Tree, strategy: str, **kwargs) -> Tree:
+        """
+        Applica la strategia di mutazione specificata.
+
+        Args:
+            tree (Tree): Albero su cui applicare la mutazione.
+            strategy (str): Nome della strategia di mutazione.
+            kwargs: Parametri aggiuntivi per la strategia.
+
+        Returns:
+            Tree: Albero mutato.
+        """
+        if strategy not in self.operators:
+            raise ValueError(f"Strategia di mutazione non supportata: {strategy}")
+        return self.operators[strategy](tree, **kwargs)
+
+    def choose_best_strategy(self) -> str:
+        """
+        Seleziona dinamicamente la migliore strategia di mutazione basata su metriche.
+
+        Returns:
+            str: Nome della strategia selezionata.
+        """
 
 # File: operators/__init__.py
 # Number of Lines: 0
 
 
 # File: operators/crossover.py
-# Number of Lines: 0
+# Number of Lines: 145
+import numpy as np
+from typing import Tuple, Callable, Optional
+from src.core.tree import Node, Tree  # Presupponendo che `Tree` e `Node` siano definiti in `tree.py`
+
+
+def subtree_crossover(parent1: Tree, parent2: Tree) -> Tuple[Tree, Tree]:
+    """
+    Esegue il crossover per sottoalberi tra due alberi genitori.
+
+    Args:
+        parent1 (Tree): Primo albero genitore.
+        parent2 (Tree): Secondo albero genitore.
+
+    Returns:
+        Tuple[Tree, Tree]: Due nuovi alberi figli dopo il crossover.
+    """
+    # Seleziona nodi casuali dai due alberi
+    crossover_point1 = parent1.random_node()
+    crossover_point2 = parent2.random_node()
+
+    # Scambia i sottoalberi nei genitori
+    child1 = parent1.copy()
+    child2 = parent2.copy()
+
+    child1.replace_subtree(crossover_point1, crossover_point2)
+    child2.replace_subtree(crossover_point2, crossover_point1)
+
+    return child1, child2
+
+
+def uniform_crossover(parent1: Tree, parent2: Tree, prob: float = 0.5) -> Tuple[Tree, Tree]:
+    """
+    Applica un crossover uniforme, scambiando nodi casuali con una certa probabilità.
+
+    Args:
+        parent1 (Tree): Primo albero genitore.
+        parent2 (Tree): Secondo albero genitore.
+        prob (float): Probabilità di scambio per ogni nodo.
+
+    Returns:
+        Tuple[Tree, Tree]: Due nuovi alberi figli dopo il crossover uniforme.
+    """
+    child1 = parent1.copy()
+    child2 = parent2.copy()
+
+    for node1, node2 in zip(child1.traverse(), child2.traverse()):
+        if np.random.rand() < prob:
+            child1.replace_subtree(node1, node2)
+            child2.replace_subtree(node2, node1)
+
+    return child1, child2
+
+
+def one_point_crossover(parent1: Tree, parent2: Tree) -> Tuple[Tree, Tree]:
+    """
+    Applica un crossover a un singolo punto tra due alberi genitori.
+
+    Args:
+        parent1 (Tree): Primo albero genitore.
+        parent2 (Tree): Secondo albero genitore.
+
+    Returns:
+        Tuple[Tree, Tree]: Due nuovi alberi figli.
+    """
+    # Trova un punto di crossover casuale per ciascun genitore
+    crossover_point1 = parent1.random_node()
+    crossover_point2 = parent2.random_node()
+
+    # Crea figli scambiando i sottoalberi
+    child1 = parent1.copy()
+    child2 = parent2.copy()
+
+    child1.replace_subtree(crossover_point1, crossover_point2)
+    child2.replace_subtree(crossover_point2, crossover_point1)
+
+    return child1, child2
+
+
+def size_limit_crossover(parent1: Tree, parent2: Tree, max_size: int) -> Tuple[Tree, Tree]:
+    """
+    Applica un crossover limitato nella dimensione degli alberi.
+
+    Args:
+        parent1 (Tree): Primo albero genitore.
+        parent2 (Tree): Secondo albero genitore.
+        max_size (int): Dimensione massima consentita per gli alberi figli.
+
+    Returns:
+        Tuple[Tree, Tree]: Due nuovi alberi figli.
+    """
+    for _ in range(10):  # Limita a 10 tentativi
+        child1, child2 = subtree_crossover(parent1, parent2)
+        if child1.size() <= max_size and child2.size() <= max_size:
+            return child1, child2
+
+    # Ritorna gli alberi genitori se non è possibile rispettare il limite di dimensione
+    return parent1.copy(), parent2.copy()
+
+
+class CrossoverOperator:
+    """
+    Classe per gestire diverse strategie di crossover.
+    """
+    def __init__(self):
+        self.operators = {
+            "subtree": subtree_crossover,
+            "uniform": uniform_crossover,
+            "one_point": one_point_crossover,
+            "size_limit": size_limit_crossover,
+        }
+    
+    def list_strategies(self) -> list:
+        """
+        Restituisce l'elenco delle strategie di crossover disponibili.
+        
+        Returns:
+            list: Nomi delle strategie disponibili.
+        """
+        return list(self.operators.keys())
+
+    def apply(self, parent1: Tree, parent2: Tree, strategy: str, **kwargs) -> Tuple[Tree, Tree]:
+        """
+        Applica la strategia di crossover specificata.
+
+        Args:
+            parent1 (Tree): Primo albero genitore.
+            parent2 (Tree): Secondo albero genitore.
+            strategy (str): Nome della strategia di crossover da applicare.
+            kwargs: Parametri aggiuntivi per la strategia.
+
+        Returns:
+            Tuple[Tree, Tree]: Due nuovi alberi figli.
+        """
+        if strategy not in self.operators:
+            raise ValueError(f"Strategia di crossover non supportata: {strategy}")
+        return self.operators[strategy](parent1, parent2, **kwargs)
+    
+    def choose_best_strategy(self) -> str:
+        """
+        Seleziona dinamicamente la migliore strategia di crossover basata su metriche.
+
+        Returns:
+            str: Nome della strategia selezionata.
+        """
+       
 
 
 # File: utils/metrics.py
@@ -385,7 +1554,53 @@ BINARY_OPERATORS = operator_set.get_binary_operators()
 
 
 # File: utils/logging_config.py
-# Number of Lines: 0
+# Number of Lines: 46
+import logging
+import os
+from datetime import datetime
+
+def setup_logging(log_dir: str = "logs", log_level: str = "DEBUG") -> logging.Logger:
+    """
+    Configura il sistema di logging per il progetto.
+
+    Args:
+        log_dir (str): Directory dove salvare i file di log.
+        log_level (str): Livello di log (es. DEBUG, INFO).
+
+    Returns:
+        logging.Logger: Istanza del logger configurato.
+    """
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"project_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+
+    # Configura il logger
+    logger = logging.getLogger("SymbolicRegression")
+    logger.setLevel(log_level)
+
+    # Formatter
+    formatter = logging.Formatter(
+        fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+    # Handler per file
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
+
+    # Handler per console
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+
+    # Aggiunge i handler al logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    logger.info("Logging system initialized.")
+    logger.info(f"Log file: {log_file}")
+
+    return logger
 
 
 # File: utils/benchmark.py
@@ -501,7 +1716,99 @@ if __name__ == "__main__":
 
 
 # File: utils/plotting.py
-# Number of Lines: 0
+# Number of Lines: 92
+import matplotlib.pyplot as plt
+import os
+from sympy import symbols, lambdify, latex
+import numpy as np
+
+def plot_fitness_history(fitness_history, output_dir="outputs/plots", file_name="fitness_history.png"):
+    """
+    Plots the fitness history over generations.
+
+    Args:
+        fitness_history (list): Fitness values for each generation.
+        output_dir (str): Directory to save the plot.
+        file_name (str): Name of the output plot file.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(10, 6))
+    plt.plot(fitness_history, marker='o')
+    plt.title("Fitness History")
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
+    plt.grid(True)
+    output_path = os.path.join(output_dir, file_name)
+    plt.savefig(output_path)
+    plt.close()
+    print(f"Fitness history plot saved to {output_path}")
+
+def plot_error(tree, x, y, file_name="error_distribution.png"):
+    """
+    Plots the error distribution between predicted and actual values.
+
+    Args:
+        tree (Tree): Syntax tree representing the formula.
+        x (np.ndarray): Input data.
+        y (np.ndarray): True output values.
+        file_name (str): File name for saving the plot.
+    """
+    y_pred = tree.root.evaluate(x)
+    error = np.abs(y - y_pred)
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(error, bins=50, alpha=0.7, color="orange", label="Error distribution")
+    plt.title("Error Distribution")
+    plt.xlabel("Absolute Error")
+    plt.ylabel("Frequency")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(f"outputs/plots/{file_name}")
+    plt.close()
+    print(f"Error distribution plot saved to outputs/plots/{file_name}")
+
+def plot_prediction_vs_actual(tree, x, y, file_name="prediction_vs_actual.png"):
+    """
+    Plots the predicted vs actual values.
+
+    Args:
+        tree (Tree): Syntax tree representing the formula.
+        x (np.ndarray): Input data.
+        y (np.ndarray): True output values.
+        file_name (str): File name for saving the plot.
+    """
+    # Calculate predictions
+    y_pred = tree.root.evaluate(x)
+
+    # Plot actual vs predicted
+    plt.figure(figsize=(10, 6))
+    plt.scatter(y, y_pred, alpha=0.6, label='Predicted vs Actual')
+    plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', label='Perfect fit')
+    plt.title("Prediction vs Actual")
+    plt.xlabel("Actual values")
+    plt.ylabel("Predicted values")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(f"outputs/plots/{file_name}")
+    plt.close()
+    print(f"Prediction vs Actual plot saved to outputs/plots/{file_name}")
+
+
+def visualize_formula(tree):
+    """
+    Visualizes the formula represented by a Tree object.
+
+    Args:
+        tree (Tree): The syntax tree representing the formula.
+
+    Returns:
+        str: LaTeX representation of the formula.
+    """
+    x = symbols('x')  # Define symbolic variable
+    formula = tree.root.to_sympy(x)  # Convert tree to sympy expression
+    latex_formula = latex(formula)
+    print(f"Formula (LaTeX): {latex_formula}")
+    return formula, latex_formula
 
 
 # File: utils/__init__.py
@@ -512,12 +1819,408 @@ if __name__ == "__main__":
 # Number of Lines: 0
 
 
-# File: preprocessing/data_loader.py
+# File: meta_rl/__init__.py
 # Number of Lines: 0
+
+
+# File: meta_rl/meta_rl_manager.py
+# Number of Lines: 284
+# File: src/meta_rl/meta_rl_manager.py
+
+"""
+Questo modulo implementa un "meta-gestore" basato su Reinforcement Learning (RL)
+che coordina diverse tecniche di ricerca:
+- Programmazione Genetica (GP)
+- Ricerca Locale (Simulated Annealing e Tabu Search)
+- Random Restart
+
+L'idea è trattare l'intero processo come un problema di apprendimento per rinforzo,
+dove stati, azioni e ricompense sono definiti in base ai progressi (fitness) e
+alla diversità della popolazione.
+
+Per adattarlo ai tuoi scopi:
+- Integra le funzioni GP, SA, TS e random_restart definite in altri moduli
+- Scegli la definizione di stato, le azioni e la funzione di ricompensa (reward)
+- Implementa un algoritmo di RL (es. Q-Learning, SARSA) che apprenda una policy
+  per massimizzare la ricompensa e, di conseguenza, il miglioramento di fitness.
+"""
+
+import numpy as np
+from typing import List, Dict, Tuple
+from src.operators.local_search import simulated_annealing, tabu_search
+from src.core.tree import Tree
+from src.core.genetic_programming import GeneticProgram
+from src.core.fitness import FitnessEvaluator
+from src.operators.mutation import MutationOperator
+from src.operators.crossover import CrossoverOperator
+
+# Se hai funzioni più semplici (placeholder) per GP, SA, TS, importale al posto
+# di GeneticProgram e local_search. Oppure richiama direttamente i metodi.
+
+# ---------------------- ESEMPI DI FUNZIONI CHE DEFINISCONO RL ---------------------- #
+
+def extract_state(population: List[Tree], fitness_scores: List[float], generations_no_improvement: int) -> Tuple[float, float, int, int]:
+    """
+    Costruisce lo 'stato' RL come una tupla di feature:
+      (best_fitness, avg_fitness, generations_no_improvement, pop_size).
+
+    Args:
+        population (List[Tree]): Lista di individui (alberi).
+        fitness_scores (List[float]): Lista dei punteggi di fitness corrispondenti.
+        generations_no_improvement (int): Generazioni consecutive senza miglioramenti.
+
+    Returns:
+        Tuple[float, float, int, int]: Stato rappresentato da 4 valori.
+    """
+    if not fitness_scores:
+        best_fitness = 1e9
+        avg_fitness = 1e9
+    else:
+        best_fitness = min(fitness_scores)
+        avg_fitness = float(np.mean(fitness_scores))
+
+    pop_size = len(population)
+    # Arrotonda best_fitness e avg_fitness per stabilità (se usi Q-table come dict)
+    return (round(best_fitness, 4), round(avg_fitness, 4), generations_no_improvement, pop_size)
+
+
+def compute_reward(old_state: Tuple[float, float, int, int],
+                   new_state: Tuple[float, float, int, int]) -> float:
+    """
+    Calcola la ricompensa (reward) in base al miglioramento della fitness.
+
+    Esempio: reward = differenza (old_best_fitness - new_best_fitness).
+    Se < 0 => peggioramento.
+    """
+    old_best_fitness = old_state[0]
+    new_best_fitness = new_state[0]
+    reward = old_best_fitness - new_best_fitness
+    return reward
+
+
+# ---------------------- AZIONI METASTRATEGICHE ---------------------- #
+
+def apply_gp(population: List[Tree],
+             fitness_scores: List[float],
+             x: np.ndarray,
+             fitness_evaluator: FitnessEvaluator,
+             num_generations: int = 1) -> List[Tree]:
+    """
+    Esegue un certo numero di generazioni di Programmazione Genetica su tutta la popolazione.
+
+    Args:
+        population (List[Tree]): Popolazione di alberi.
+        fitness_scores (List[float]): Punteggi di fitness corrispondenti.
+        x (np.ndarray): Dati di input per valutare la fitness.
+        fitness_evaluator (FitnessEvaluator): Oggetto per calcolare la fitness.
+        num_generations (int): Quante generazioni di GP eseguire (default: 1).
+
+    Returns:
+        List[Tree]: Nuova popolazione aggiornata dopo le generazioni GP.
+    """
+    # Invece di definire tutto da zero, potresti usare GeneticProgram:
+    # 1) Crei un'istanza fittizia di GeneticProgram
+    gp_temp = GeneticProgram(
+        population_size=len(population),
+        max_generations=num_generations,
+        max_tree_depth=6,
+        mutation_rate=0.3,
+        crossover_rate=0.7,
+        fitness_evaluator=fitness_evaluator,
+    )
+
+    # Sostituisci la popolazione iniziale con la tua
+    gp_temp.population = population
+    gp_temp.fitness_scores = fitness_scores  # Se vuoi mantenerli
+    # Esegui .run() => evolverà la popolazione per `num_generations`
+    gp_temp.run(x, max_no_improvement=num_generations * 2)  # giusto per fermarlo
+    return gp_temp.population
+
+
+def apply_sa(population: List[Tree],
+             fitness_scores: List[float],
+             x: np.ndarray,
+             fitness_evaluator: FitnessEvaluator,
+             max_iterations: int = 100) -> List[Tree]:
+    """
+    Esegue Simulated Annealing su un sottoinsieme di individui promettenti della popolazione.
+    """
+    new_population = list(population)  # copia
+    sorted_indices = np.argsort(fitness_scores)
+    top_k_indices = sorted_indices[:3]  # ad es. prendi i 3 migliori
+
+    for idx in top_k_indices:
+        best_solution = simulated_annealing(
+            initial_solution=new_population[idx],
+            fitness_function=lambda ind: fitness_evaluator.fitness(ind, x),
+            max_iterations=max_iterations,
+            initial_temperature=100.0,
+            cooling_rate=0.95
+        )
+        new_population[idx] = best_solution
+
+    return new_population
+
+
+def apply_ts(population: List[Tree],
+             fitness_scores: List[float],
+             x: np.ndarray,
+             fitness_evaluator: FitnessEvaluator,
+             max_iterations: int = 100) -> List[Tree]:
+    """
+    Esegue Tabu Search su un sottoinsieme di individui "bloccati" (ad es. i peggiori).
+    """
+    new_population = list(population)
+    sorted_indices = np.argsort(fitness_scores)
+    worst_k_indices = sorted_indices[-3:]  # peggiori 3
+
+    for idx in worst_k_indices:
+        best_solution = tabu_search(
+            initial_solution=new_population[idx],
+            fitness_function=lambda ind: fitness_evaluator.fitness(ind, x),
+            max_iterations=max_iterations,
+            tabu_list_size=5,
+            neighborhood_size=5
+        )
+        new_population[idx] = best_solution
+
+    return new_population
+
+
+def random_restart(population: List[Tree],
+                   size: int = 50,
+                   max_tree_depth: int = 6) -> List[Tree]:
+    """
+    Rimpiazza parzialmente o totalmente la popolazione con individui random.
+    Qui lo facciamo totalmente per semplicità.
+
+    Args:
+        population (List[Tree]): Popolazione corrente.
+        size (int): Nuova dimensione popolazione desiderata.
+        max_tree_depth (int): Profondità massima dei nuovi alberi.
+
+    Returns:
+        List[Tree]: Nuova popolazione random.
+    """
+    from src.core.tree import Tree
+    new_population = [
+        Tree.generate_random_tree(max_depth=max_tree_depth, operator_set="basic")
+        for _ in range(size)
+    ]
+    return new_population
+
+
+# ---------------------- ALGORITMO RL PRINCIPALE ---------------------- #
+
+def rl_meta_algorithm(
+    initial_population: List[Tree],
+    fitness_evaluator: FitnessEvaluator,
+    x: np.ndarray,
+    max_steps: int = 50,
+    alpha: float = 0.1,
+    gamma: float = 0.95,
+    epsilon: float = 0.1
+) -> List[Tree]:
+    """
+    Esegue un loop di Reinforcement Learning (Q-Learning) per selezionare azioni meta
+    (GP, SA, TS, random restart) massimizzando il miglioramento di fitness.
+
+    Args:
+        initial_population (List[Tree]): Popolazione iniziale di alberi.
+        fitness_evaluator (FitnessEvaluator): Valutatore di fitness.
+        x (np.ndarray): Dati di input per calcolare la fitness.
+        max_steps (int): Iterazioni totali del meta-algoritmo.
+        alpha (float): Tasso di apprendimento (Q-learning).
+        gamma (float): Fattore di sconto.
+        epsilon (float): Parametro di esplorazione epsilon-greedy.
+
+    Returns:
+        List[Tree]: Popolazione finale (o quella risultante alla fine del loop).
+    """
+    # Azioni possibili
+    actions = ["apply_gp", "apply_sa", "apply_ts", "random_restart"]
+
+    # Inizializza la popolazione e calcola la fitness
+    population = initial_population
+    fitness_scores = [fitness_evaluator.fitness(ind, x) for ind in population]
+
+    # Q-table = dict con chiave: stato, valore: dict { azione: Q-value }
+    Q: Dict[Tuple[float, float, int, int], Dict[str, float]] = {}
+    best_global_fitness = min(fitness_scores) if fitness_scores else 1e9
+    generations_no_improvement = 0
+
+    # Stato iniziale
+    state = extract_state(population, fitness_scores, generations_no_improvement)
+
+    for step in range(max_steps):
+        # Se lo stato non è presente in Q, inizializziamo le Q-values
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+
+        # Scegli un'azione con epsilon-greedy
+        if np.random.rand() < epsilon:
+            action = np.random.choice(actions)
+        else:
+            # prendi l'azione con Q-value maggiore
+            action = max(Q[state], key=Q[state].get)
+
+        # Salva popolazione e fitness per calcolo reward
+        old_population = population
+        old_fitness_scores = fitness_scores
+
+        # ---------------------------- ESECUZIONE AZIONE ----------------------------
+        if action == "apply_gp":
+            population = apply_gp(population, fitness_scores, x, fitness_evaluator, num_generations=1)
+        elif action == "apply_sa":
+            population = apply_sa(population, fitness_scores, x, fitness_evaluator, max_iterations=50)
+        elif action == "apply_ts":
+            population = apply_ts(population, fitness_scores, x, fitness_evaluator, max_iterations=50)
+        elif action == "random_restart":
+            population = random_restart(population, size=len(population))
+
+        # Ricalcola la fitness
+        fitness_scores = [fitness_evaluator.fitness(ind, x) for ind in population]
+        new_best_fitness = min(fitness_scores) if fitness_scores else 1e9
+
+        # Verifica miglioramento best globale
+        if new_best_fitness < best_global_fitness:
+            best_global_fitness = new_best_fitness
+            generations_no_improvement = 0
+        else:
+            generations_no_improvement += 1
+
+        # Nuovo stato
+        new_state = extract_state(population, fitness_scores, generations_no_improvement)
+
+        # Calcoliamo la ricompensa (reward)
+        reward = compute_reward(state, new_state)
+
+        # Se il nuovo stato non è in Q, inizializzalo
+        if new_state not in Q:
+            Q[new_state] = {a: 0.0 for a in actions}
+
+        # Aggiorna la Q-table (Q-learning off-policy)
+        old_q = Q[state][action]
+        best_future_q = max(Q[new_state].values())
+
+        Q[state][action] = old_q + alpha * (reward + gamma * best_future_q - old_q)
+
+        # Passa al nuovo stato
+        state = new_state
+
+    return population
+
+
+# File: preprocessing/data_loader.py
+# Number of Lines: 73
+import numpy as np
+import os
+from src.preprocessing.data_statistics import dataset_statistics, plot_distribution
+
+
+def load_npz_file(file_path: str, output_dir: str = "outputs/plots", debug: bool = False) -> dict:
+    """
+    Carica un file .npz, valida i dati e presenta statistiche utili e distribuzioni.
+
+    Args:
+        file_path (str): Percorso al file .npz.
+        output_dir (str): Directory per salvare i grafici delle distribuzioni.
+        debug (bool): Se True, stampa messaggi di debug.
+
+    Returns:
+        dict: Dizionario contenente i dati caricati.
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    data = np.load(file_path)
+    x, y = data["x"], data["y"]
+
+    # Validazione: assicura che il numero di campioni corrisponda
+    if x.shape[1] != len(y):
+        raise ValueError(
+            f"Inconsistent data: 'x' has {x.shape[1]} samples but 'y' has {len(y)} targets."
+        )
+
+    dataset = {"x": x, "y": y}
+
+    # plot_3d_interactive(dataset)
+
+    # Genera statistiche e distribuzioni
+    if debug:
+        print("\nDataset Information:")
+        print(f"  Number of features: {x.shape[0]}")
+        print(f"  Number of samples: {x.shape[1]}")
+        print(f"  Target shape: {y.shape}")
+        print(f"  Target mean: {y.mean():.4f}, Target std: {y.std():.4f}")
+        dataset_statistics(dataset)
+        plot_distribution(
+            dataset,
+            output_dir=output_dir,
+            file_name=f"{os.path.basename(file_path).replace('.npz', '_distribution.png')}"
+        )
+
+    return dataset
+
+
+def save_npz_file(data: dict, file_path: str) -> None:
+    """
+    Salva un dataset in formato .npz.
+
+    Args:
+        data (dict): Dizionario contenente i dati da salvare.
+        file_path (str): Percorso in cui salvare il file .npz.
+    """
+    if "x" not in data or "y" not in data:
+        raise ValueError("Dataset must contain 'x' and 'y' keys.")
+
+    x, y = data["x"], data["y"]
+    if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
+        raise TypeError("Both 'x' and 'y' must be NumPy arrays.")
+
+    if x.shape[1] != len(y):
+        raise ValueError(
+            f"Inconsistent data: 'x' has {x.shape[1]} samples, "
+            f"but 'y' has {len(y)} samples."
+        )
+
+    np.savez(file_path, **data)
+    print(f"Dataset saved in {file_path}")
 
 
 # File: preprocessing/splitter.py
-# Number of Lines: 0
+# Number of Lines: 31
+import numpy as np
+from typing import Tuple
+
+
+def split_dataset(data: dict, train_size: float = 0.8, shuffle: bool = True) -> Tuple[dict, dict]:
+    """
+    Divide un dataset in set di training e test.
+
+    Args:
+        data (dict): Dataset da dividere (con chiavi 'x' e 'y').
+        train_size (float): Proporzione del set di training (default 0.8).
+        shuffle (bool): Se mescolare i dati prima della divisione (default True).
+
+    Returns:
+        Tuple[dict, dict]: Dizionari contenenti il training set e il test set.
+    """
+    if 'x' not in data or 'y' not in data:
+        raise ValueError("Il dataset deve contenere chiavi 'x' e 'y'.")
+
+    x, y = data['x'], data['y']
+    indices = np.arange(len(x))
+    if shuffle:
+        np.random.shuffle(indices)
+
+    split_idx = int(len(x) * train_size)
+    train_indices, test_indices = indices[:split_idx], indices[split_idx:]
+
+    train_set = {'x': x[train_indices], 'y': y[train_indices]}
+    test_set = {'x': x[test_indices], 'y': y[test_indices]}
+
+    return train_set, test_set
 
 
 # File: preprocessing/__init__.py
@@ -525,41 +2228,102 @@ if __name__ == "__main__":
 
 
 # File: preprocessing/data_statistics.py
-# Number of Lines: 73
+# Number of Lines: 132
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+# import plotly.graph_objects as go
 
-def load_npz_file(file_path: str):
-    """
-    Carica un file .npz e restituisce i dati in esso contenuti.
+# def plot_3d_interactive(data: dict):
+#     """
+#     Plots an interactive 3D surface for a dataset with two features and one target.
 
-    Args:
-        file_path (str): Percorso al file .npz.
+#     Args:
+#         dataset_path (str): Path to the .npz dataset file.
+#     """
+#     # Load the dataset
+#     x = data["x"]
+#     y = data["y"]
 
-    Returns:
-        dict: Dizionario contenente i dati caricati.
-    """
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"File not found: {file_path}")
-    data = np.load(file_path)
-    return {key: data[key] for key in data}
+#     if x.shape[0] != 2:
+#         raise ValueError("This visualization only supports datasets with exactly two features.")
+
+#     # Extract features
+#     x1 = x[0, :]
+#     x2 = x[1, :]
+
+#     # Create a mesh grid for x1 and x2
+#     grid_size = 50
+#     x1_grid, x2_grid = np.meshgrid(
+#         np.linspace(x1.min(), x1.max(), grid_size),
+#         np.linspace(x2.min(), x2.max(), grid_size)
+#     )
+
+#     # Interpolate y values over the mesh grid
+#     # Using a simple nearest-neighbor interpolation for the purpose of visualization
+#     from scipy.interpolate import griddata
+#     y_grid = griddata(
+#         points=(x1, x2), 
+#         values=y, 
+#         xi=(x1_grid, x2_grid), 
+#         method="linear"
+#     )
+
+#     # Create a 3D surface plot
+#     fig = go.Figure(
+#         data=[go.Surface(
+#             z=y_grid, 
+#             x=x1_grid, 
+#             y=x2_grid, 
+#             colorscale="Viridis", 
+#             showscale=True
+#         )]
+#     )
+
+#     # Add axis labels
+#     fig.update_layout(
+#         title="3D Surface Plot of Features and Target",
+#         scene=dict(
+#             xaxis_title="Feature 1",
+#             yaxis_title="Feature 2",
+#             zaxis_title="Target (y)"
+#         )
+#     )
+
+#     # Show the plot
+#     fig.show()
 
 def dataset_statistics(data: dict):
     """
-    Stampa statistiche base (media, deviazione standard, minimo, massimo) per ogni variabile nel dataset.
+    Stampa statistiche base per ogni variabile nel dataset.
 
     Args:
         data (dict): Dizionario contenente le variabili del dataset.
     """
-    print("\nDataset Statistics:")
-    for key, array in data.items():
-        print(f"Variable: {key}")
-        print(f"  Shape: {array.shape}")
-        print(f"  Mean: {np.mean(array):.4f}")
-        print(f"  Std Dev: {np.std(array):.4f}")
-        print(f"  Min: {np.min(array):.4f}")
-        print(f"  Max: {np.max(array):.4f}")
+    if "x" not in data or "y" not in data:
+        raise ValueError("Dataset must contain 'x' and 'y' keys.")
+
+    x, y = data["x"], data["y"]
+
+    print("\nDetailed Statistics:")
+    print("-" * 50)
+    print(f"Input (x):")
+    print(f"  Number of features: {x.shape[0]}")
+    print(f"  Number of samples: {x.shape[1]}")
+    for i in range(x.shape[0]):
+        print(f"    Feature {i + 1}:")
+        print(f"      Mean: {x[i].mean():.4f}")
+        print(f"      Std Dev: {x[i].std():.4f}")
+        print(f"      Min: {x[i].min():.4f}")
+        print(f"      Max: {x[i].max():.4f}")
+
+    print("\nTarget (y):")
+    print(f"  Mean: {y.mean():.4f}")
+    print(f"  Std Dev: {y.std():.4f}")
+    print(f"  Min: {y.min():.4f}")
+    print(f"  Max: {y.max():.4f}")
+    print("-" * 50)
+
 
 def plot_distribution(data: dict, output_dir: str = "outputs/plots", file_name: str = "distribution.png"):
     """
@@ -571,34 +2335,32 @@ def plot_distribution(data: dict, output_dir: str = "outputs/plots", file_name: 
         file_name (str): Nome del file del grafico salvato.
     """
     os.makedirs(output_dir, exist_ok=True)
+
     plt.figure(figsize=(10, 6))
+    x, y = data["x"], data["y"]
+    for i in range(x.shape[0]):
+        plt.hist(
+            x[i, :],
+            bins=50,
+            alpha=0.5,
+            label=f"Feature {i + 1} ({x.shape[1]} samples)"
+        )
+    plt.hist(
+        y,
+        bins=50,
+        alpha=0.5,
+        label=f"Target (y) ({len(y)} samples)",
+        color="orange"
+    )
 
-    for key, array in data.items():
-        plt.hist(array.flatten(), bins=50, alpha=0.5, label=f"{key} (shape: {array.shape})")
-
-    plt.title("Variable Distributions")
+    plt.title("Distributions of Features and Target")
     plt.xlabel("Value")
     plt.ylabel("Frequency")
-    plt.legend()
+    plt.legend(loc="best")
     output_path = os.path.join(output_dir, file_name)
     plt.savefig(output_path)
     plt.close()
     print(f"Distribution plot saved to {output_path}")
-
-def analyze_dataset(file_path: str, output_dir: str = "outputs/plots"):
-    """
-    Analizza un dataset .npz, stampa statistiche e genera un grafico della distribuzione.
-
-    Args:
-        file_path (str): Percorso al file .npz.
-        output_dir (str): Directory dove salvare il grafico.
-    """
-    print(f"Analyzing dataset: {file_path}")
-    data = load_npz_file(file_path)
-    dataset_statistics(data)
-    plot_distribution(data, output_dir=output_dir, file_name=f"{os.path.basename(file_path).replace('.npz', '_distribution.png')}")
-
-analyze_dataset("data/raw/problem_0.npz", output_dir="outputs/plots")
 
 
 """
