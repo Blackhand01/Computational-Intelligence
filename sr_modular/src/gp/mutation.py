@@ -109,9 +109,6 @@ class NoopMutation(BaseMutationStrategy):
 ################################
 class AdaptiveMutationManager:
     def __init__(self, statistics):
-        """
-        :param statistics: Un dizionario o un oggetto con le metriche (complexity, diversity, stagnation, ecc.)
-        """
         self.strategies = {
             "simple": SimpleMutation(),
             "subtree": SubtreeMutation(),
@@ -119,21 +116,25 @@ class AdaptiveMutationManager:
             "shrink": ShrinkMutation(),
             "noop": NoopMutation()
         }
-        self.statistics = statistics  # ad es. un dizionario con le metriche
+        self.statistics = statistics
+        self.active_strategy = "simple"  # Default strategy
 
     def choose_strategy(self) -> BaseMutationStrategy:
-        """
-        Sceglie dinamicamente la strategia in base alle statistiche fornite.
-        """
         if self.statistics.get("complexity", 0) > 10:
-            return self.strategies["shrink"]
+            self.active_strategy = "shrink"
         elif self.statistics.get("diversity", 0) < 5:
-            return self.strategies["subtree"]
+            self.active_strategy = "subtree"
         elif self.statistics.get("stagnation", False):
-            return self.strategies["hoist"]
+            self.active_strategy = "hoist"
         else:
-            return self.strategies["simple"]
+            self.active_strategy = "simple"
+
+        return self.strategies[self.active_strategy]
 
     def mutate(self, individual: Node, n_features: int) -> Node:
-        chosen_strat = self.choose_strategy()
-        return chosen_strat.mutate(individual, n_features)
+        chosen_strategy = self.choose_strategy()
+        return chosen_strategy.mutate(individual, n_features)
+
+    def get_active_strategy(self) -> str:
+        """Restituisce la strategia attiva."""
+        return self.active_strategy

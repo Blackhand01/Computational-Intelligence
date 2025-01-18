@@ -90,10 +90,6 @@ class ElitistSelection(BaseSelectionStrategy):
         return population[best_index]
 
 class AdaptiveSelectionManager:
-    """
-    Dynamically selects the best strategy based on statistics.
-    """
-
     def __init__(self, statistics):
         self.strategies = {
             "tournament": TournamentSelection(),
@@ -102,20 +98,24 @@ class AdaptiveSelectionManager:
             "elitist": ElitistSelection()
         }
         self.statistics = statistics
+        self.active_strategy = "elitist"  # Default strategy
 
     def choose_strategy(self) -> BaseSelectionStrategy:
-        """
-        Dynamically choose the strategy based on statistics.
-        """
         if self.statistics.get("complexity", 0) > 10:
-            return self.strategies["rank"]
+            self.active_strategy = "rank"
         elif self.statistics.get("diversity", 0) < 5:
-            return self.strategies["tournament"]
+            self.active_strategy = "tournament"
         elif self.statistics.get("stagnation", False):
-            return self.strategies["roulette"]
+            self.active_strategy = "roulette"
         else:
-            return self.strategies["elitist"]
+            self.active_strategy = "elitist"
 
-    def select(self, population: List[Node], x, y, bloat_penalty: float) -> Node:
+        return self.strategies[self.active_strategy]
+
+    def select(self, population: list[Node], x, y, bloat_penalty: float) -> Node:
         chosen_strategy = self.choose_strategy()
         return chosen_strategy.select(population, x, y, bloat_penalty)
+
+    def get_active_strategy(self) -> str:
+        """Restituisce la strategia attiva."""
+        return self.active_strategy

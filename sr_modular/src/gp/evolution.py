@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from tree import Node 
 from gp.mutation import AdaptiveMutationManager
 from gp.crossover import AdaptiveCrossoverManager
@@ -63,41 +64,67 @@ class GeneticProgramming:
     Coordina la programmazione genetica con manager adattivi.
     """
     @staticmethod
-    def run_gp(x, y, n_features, generations, bloat_penalty):
-        # Genera la popolazione iniziale
+    def run_gp(x, y, n_features, generations, bloat_penalty, logger, stats, progress_bar=None):
+        """
+        Esegue la programmazione genetica.
+
+        Args:
+            x (np.ndarray): Input features.
+            y (np.ndarray): Target values.
+            n_features (int): Numero di feature disponibili.
+            generations (int): Numero di generazioni.
+            bloat_penalty (float): Penalità per la dimensione dell'albero.
+            logger (Logger): Logger per registrare informazioni.
+            stats (GPStatistics): Oggetto per raccogliere statistiche.
+            progress_bar (tqdm.tqdm): Barra di progresso opzionale.
+
+        Returns:
+            Node: L'individuo migliore trovato.
+        """
         population = generate_population(MAX_DEPTH, n_features)
         evaluator = Evaluator()
-        stats = GPStatistics()
 
-        # Inizializza i manager
+        # Manager adattivi per selezione, crossover e mutazione
         selection_manager = AdaptiveSelectionManager(stats.get_stats_dict())
         crossover_manager = AdaptiveCrossoverManager(stats.get_stats_dict())
         mutation_manager = AdaptiveMutationManager(stats.get_stats_dict())
 
-        best_individual = None
-        best_fitness = float('inf')
-
         for gen in range(generations):
-            # Aggiorna le statistiche prima di evolvere
+            # Trova il miglior individuo nella popolazione
             current_best, current_fitness = evaluator.get_best_individual(population, x, y, bloat_penalty)
-            stats.update(population, x, y, bloat_penalty, current_fitness)
+
+            # Ottieni le strategie attive
+            active_strategies = {
+                "selection": selection_manager.get_active_strategy(),
+                "crossover": crossover_manager.get_active_strategy(),
+                "mutation": mutation_manager.get_active_strategy(),
+            }
+
+            # Aggiorna statistiche
+            stats.update(population, x, y, bloat_penalty, current_fitness, active_strategies)
 
             # Passa le statistiche aggiornate ai manager
             selection_manager.statistics = stats.get_stats_dict()
             crossover_manager.statistics = stats.get_stats_dict()
             mutation_manager.statistics = stats.get_stats_dict()
 
-            # Evolvi la popolazione
+            # Evoluzione della popolazione
             population = evolve_population(
                 population, x, y, n_features, gen, bloat_penalty,
                 selection_manager, crossover_manager, mutation_manager, stats
             )
 
-            # Aggiorna il miglior individuo
-            if current_fitness < best_fitness:
-                best_fitness = current_fitness
-                best_individual = current_best
+            logger.info(
+                f"Generation {gen + 1}/{generations} - Best Fitness: {current_fitness:.4f}",
+                generation=gen + 1,
+                best_fitness=current_fitness,
+                avg_fitness=np.mean([evaluator.fitness_function(ind, x, y, bloat_penalty) for ind in population]),
+                diversity=stats.diversity,
+                complexity=stats.complexity,
+                strategies=active_strategies,
+            )
 
-            print(f"Generazione {gen + 1}/{generations} | Miglior fitness: {best_fitness:.4f}")
+            if progress_bar:
+                progress_bar.update(1)
 
-        return best_individual
+        return current_best

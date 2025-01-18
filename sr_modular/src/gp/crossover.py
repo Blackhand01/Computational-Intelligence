@@ -89,9 +89,6 @@ class NoopCrossoverStrategy(BaseCrossoverStrategy):
 
 class AdaptiveCrossoverManager:
     def __init__(self, statistics):
-        """
-        :param statistics: A dictionary or object containing metrics (e.g., complexity, diversity, stagnation).
-        """
         self.strategies = {
             "subtree": SubtreeCrossoverStrategy(),
             "one_point": OnePointCrossoverStrategy(),
@@ -100,20 +97,24 @@ class AdaptiveCrossoverManager:
             "noop": NoopCrossoverStrategy()
         }
         self.statistics = statistics
+        self.active_strategy = "one_point"  # Default strategy
 
     def choose_strategy(self) -> BaseCrossoverStrategy:
-        """
-        Dynamically chooses a strategy based on provided statistics.
-        """
         if self.statistics.get("complexity", 0) > 10:
-            return self.strategies["blended"]
+            self.active_strategy = "blended"
         elif self.statistics.get("diversity", 0) < 5:
-            return self.strategies["uniform"]
+            self.active_strategy = "uniform"
         elif self.statistics.get("stagnation", False):
-            return self.strategies["subtree"]
+            self.active_strategy = "subtree"
         else:
-            return self.strategies["one_point"]
+            self.active_strategy = "one_point"
+
+        return self.strategies[self.active_strategy]
 
     def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         chosen_strategy = self.choose_strategy()
         return chosen_strategy.crossover(parent1, parent2)
+
+    def get_active_strategy(self) -> str:
+        """Restituisce la strategia attiva."""
+        return self.active_strategy
