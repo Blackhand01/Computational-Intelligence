@@ -22,7 +22,18 @@ class Node:
         elif len(self.children) == 2:
             return f"({self.children[0]} {self.op} {self.children[1]})"
         return "N/A"
+    
+    def iterate_nodes(self):
+            """
+            Itera su tutti i nodi dell'albero a partire dal nodo corrente.
 
+            Yields:
+                Node: Il nodo corrente durante l'iterazione.
+            """
+            yield self  # Ritorna il nodo corrente
+            for child in self.children:  # Itera sui figli
+                yield from child.iterate_nodes()  # Ricorsione sui figli
+                
     def is_variable(self):
         return isinstance(self.value, tuple) and self.value[0] == 'x'
 

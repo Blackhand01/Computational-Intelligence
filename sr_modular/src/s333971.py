@@ -18,28 +18,28 @@ def f1(x: np.ndarray) -> np.ndarray:
 
 
 def f2(x: np.ndarray) -> np.ndarray:
-    return np.exp(np.add(np.power(np.sqrt(np.maximum(x[0], x[1])), np.exp(np.add(np.power(np.sqrt(np.maximum(x[0], x[1])), np.add(np.subtract(0.373, 0.239), np.add(x[1], x[0]))), np.tan(np.subtract(np.power(0.192, 0.943), np.power(x[1], -0.759)))))), np.maximum(x[0], x[1])))
+    return np.abs(np.exp(np.divide(np.power(x[1], np.minimum(x[0], x[1])), np.add(np.subtract(x[0], -0.526), x[2]))))
 
 
 def f3(x: np.ndarray) -> np.ndarray:
-    return np.subtract(np.log10(np.subtract(np.negative(x[2]), np.divide(np.add(np.log10(np.maximum(x[1], x[2])), np.log2(np.subtract(x[1], 0.759))), np.abs(-0.72)))), np.minimum(np.log10(np.maximum(x[1], x[2])), np.add(np.log10(np.maximum(x[1], x[2])), np.log2(np.subtract(x[1], 0.759)))))
+    return np.negative(np.log2(np.log(np.log10(np.divide(x[1], x[0])))))
 
 
 def f4(x: np.ndarray) -> np.ndarray:
-    return np.subtract(np.negative(np.negative(np.exp(np.exp(np.cos(x[1]))))), np.exp(np.divide(0.021, 0.792)))
+    return np.cos(x[1])
 
 
 def f5(x: np.ndarray) -> np.ndarray:
-    return 0.012
+    return -0.068
 
 
 def f6(x: np.ndarray) -> np.ndarray:
-    return np.add(x[1], np.add(x[1], np.tan(np.cos(np.multiply(-0.829, x[0])))))
+    return x[1]
 
 
 def f7(x: np.ndarray) -> np.ndarray:
-    return np.power(np.maximum(np.maximum(np.sin(np.abs(-0.721)), np.log10(np.log2(x[0]))), np.negative(np.log10(np.abs(x[0])))), np.log10(np.multiply(np.log10(np.log2(x[0])), np.add(np.subtract(x[1], x[0]), np.maximum(x[0], 0.681)))))
+    return np.subtract(np.log10(np.minimum(np.abs(np.subtract(x[0], x[0])), np.tan(np.sqrt(0.33)))), np.log(np.log2(np.minimum(np.log2(x[0]), np.power(x[1], x[0])))))
 
 
 def f8(x: np.ndarray) -> np.ndarray:
-    return np.minimum(np.sqrt(np.multiply(np.exp(np.abs(x[3])), np.negative(np.power(0.995, 0.352)))), np.add(np.log(np.tan(np.maximum(x[5], -0.694))), np.minimum(np.sqrt(np.multiply(np.exp(np.abs(x[3])), np.log2(np.log2(-0.201)))), np.add(np.log2(np.log10(np.multiply(x[5], 0.731))), np.log(np.log10(np.multiply(x[5], 0.682)))))))
+    return np.abs(np.multiply(np.add(np.abs(0.962), np.abs(np.add(-0.706, x[0]))), np.divide(np.subtract(np.power(0.705, 0.396), np.multiply(-0.205, x[5])), 0.066)))

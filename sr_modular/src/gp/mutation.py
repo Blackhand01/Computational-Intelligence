@@ -1,35 +1,139 @@
 import random
+from abc import ABC, abstractmethod
 from tree import Node, random_variable, random_constant
 from safe_math import ALL_OPERATORS
 from gp.utils import get_random_node
 
-def mutate(individual, n_features):
+class BaseMutationStrategy(ABC):
     """
-    Applica una mutazione casuale a un albero.
-
-    Args:
-        individual (Node): Albero da mutare.
-        n_features (int): Numero di feature disponibili.
-
-    Returns:
-        Node: Albero mutato.
+    Abstract base class for mutation strategies.
     """
-    mutant = Node.copy_tree(individual)
-    node, _ = get_random_node(mutant)
 
-    if node.op is None:
-        # Nodo foglia
-        node.value = random_variable(n_features) if random.random() < 0.5 else random_constant()
-    else:
-        current_arity = ALL_OPERATORS[node.op].arity
-        if current_arity == 1:
-            valid_unaries = [op for op in ALL_OPERATORS.values() if op.arity == 1]
-            node.op = random.choice(valid_unaries).name
-        elif current_arity == 2:
-            valid_binaries = [op for op in ALL_OPERATORS.values() if op.arity == 2]
-            node.op = random.choice(valid_binaries).name
-            while len(node.children) < 2:
-                node.children.append(Node.generate_random_tree(1, n_features, grow=True))
+    @abstractmethod
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        pass
 
-    return mutant
+class SimpleMutation(BaseMutationStrategy):
+    """
+    Simple mutation strategy that preserves the arity of the operator.
+    """
 
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        mutant = individual.copy_tree()
+        node, _ = get_random_node(mutant)
+
+        if node.op is None:  # Leaf node
+            if node.is_variable():
+                node.value = random_constant()
+            else:
+                node.value = random_variable(n_features)
+        else:  # Internal node
+            current_arity = ALL_OPERATORS[node.op].arity
+            valid_ops = [op for op in ALL_OPERATORS.values() if op.arity == current_arity]
+            node.op = random.choice(valid_ops).name
+
+        return mutant
+
+class SubtreeMutation(BaseMutationStrategy):
+    """
+    Replaces a randomly chosen subtree with a new randomly generated tree.
+    """
+
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        mutant = individual.copy_tree()
+        node, _ = get_random_node(mutant)
+
+        # Replace subtree
+        new_subtree = Node.generate_random_tree(depth=3, n_features=n_features, grow=True)
+        node.replace_with(new_subtree)
+
+        return mutant
+
+class HoistMutation(BaseMutationStrategy):
+    """
+    Replaces the root of a subtree with one of its children.
+    """
+
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        mutant = individual.copy_tree()
+        node, _ = get_random_node(mutant)
+
+        if not node.is_leaf():
+            # Randomly select one of the children to hoist
+            hoisted_child = random.choice(node.children)
+            node.replace_with(hoisted_child.copy_tree())
+
+        return mutant
+
+class CreepMutation(BaseMutationStrategy):
+    """
+    Slightly adjusts constants within the tree by adding a small random value.
+    """
+
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        mutant = individual.copy_tree()
+        node, _ = get_random_node(mutant)
+
+        if node.op is None and not node.is_variable():  # Only adjust constants
+            creep_value = random.uniform(-0.1, 0.1)  # Small adjustment
+            node.value += creep_value
+
+        return mutant
+
+class ShrinkMutation(BaseMutationStrategy):
+    """
+    Replaces a subtree with a leaf node.
+    """
+
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        mutant = individual.copy_tree()
+        node, _ = get_random_node(mutant)
+
+        if node.op is not None:  # Only apply to non-leaf nodes
+            node.op = None
+            node.value = random.choice([random_constant(), random_variable(n_features)])
+            node.children = []
+
+        return mutant
+
+class NoopMutation(BaseMutationStrategy):
+    """
+    Does nothing (useful for testing).
+    """
+
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        return individual.copy_tree()
+
+################################
+# Manager adattivo
+################################
+class AdaptiveMutationManager:
+    def __init__(self, statistics):
+        """
+        :param statistics: Un dizionario o un oggetto con le metriche (complexity, diversity, stagnation, ecc.)
+        """
+        self.strategies = {
+            "simple": SimpleMutation(),
+            "subtree": SubtreeMutation(),
+            "hoist": HoistMutation(),
+            "shrink": ShrinkMutation(),
+            "noop": NoopMutation()
+        }
+        self.statistics = statistics  # ad es. un dizionario con le metriche
+
+    def choose_strategy(self) -> BaseMutationStrategy:
+        """
+        Sceglie dinamicamente la strategia in base alle statistiche fornite.
+        """
+        if self.statistics.get("complexity", 0) > 10:
+            return self.strategies["shrink"]
+        elif self.statistics.get("diversity", 0) < 5:
+            return self.strategies["subtree"]
+        elif self.statistics.get("stagnation", False):
+            return self.strategies["hoist"]
+        else:
+            return self.strategies["simple"]
+
+    def mutate(self, individual: Node, n_features: int) -> Node:
+        chosen_strat = self.choose_strategy()
+        return chosen_strat.mutate(individual, n_features)
