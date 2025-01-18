@@ -1,47 +1,82 @@
 from typing import Callable, Optional
 import numpy as np
 
-# Costanti globali per operazioni sicure
 MAX_EXP = 10
 MAX_POWER = 5
 MAX_FLOAT = 1e10
 MIN_FLOAT = 1e-10
 
 
+# Funzioni di supporto
+def clip_values(x: np.ndarray, min_value: float, max_value: float) -> np.ndarray:
+    """Clip values to a specified range."""
+    return np.clip(x, min_value, max_value)
+
+
+def validate_array(array: np.ndarray) -> bool:
+    """Check if array contains valid numbers (no NaN, inf, or extreme values)."""
+    if not np.isfinite(array).all():
+        return False
+    if np.any(array > MAX_FLOAT) or np.any(array < -MAX_FLOAT):
+        return False
+    return True
+
+
+
 # Operazioni sicure
 def safe_divide(x: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Performs element-wise safe division, avoiding division by zero."""
-    return np.divide(x, y, out=np.zeros_like(x), where=y != 0)
+    """Perform element-wise safe division, avoiding division by zero."""
+    y_safe = np.where(np.abs(y) < MIN_FLOAT, MIN_FLOAT, y)
+    return np.divide(x, y_safe)
 
 
 def safe_ln(x: np.ndarray) -> np.ndarray:
-    """Applies natural logarithm safely, avoiding ln(0) and negative values."""
-    return np.log(np.clip(x, MIN_FLOAT, MAX_FLOAT))
+    """Apply natural logarithm safely, avoiding ln(0) and negative values."""
+    return np.log(clip_values(x, MIN_FLOAT, MAX_FLOAT))
 
 
 def safe_sqrt(x: np.ndarray) -> np.ndarray:
-    """Applies square root safely, avoiding sqrt of negative numbers."""
-    return np.sqrt(np.clip(x, 0, MAX_FLOAT))
+    """Apply square root safely, avoiding sqrt of negative numbers."""
+    return np.sqrt(clip_values(x, 0, MAX_FLOAT))
 
 
 def safe_power(x: np.ndarray, p: np.ndarray) -> np.ndarray:
-    """Raises x to the power p safely, avoiding overflow."""
-    return np.power(np.clip(x, MIN_FLOAT, MAX_FLOAT), np.clip(p, -MAX_POWER, MAX_POWER))
+    """Raise x to the power p safely, handling edge cases."""
+    # Clip inputs to safe ranges
+    x_safe = np.clip(x, MIN_FLOAT, MAX_FLOAT)  # Prevent overflow and invalid bases
+    p_safe = np.clip(p, -MAX_POWER, MAX_POWER)
+
+    # Handle negative bases with fractional powers
+    is_fractional_power = (p_safe % 1 != 0)
+    x_safe = np.where(
+        (x_safe < 0) & is_fractional_power, 
+        MIN_FLOAT,  # Replace invalid combinations with a small positive value
+        x_safe
+    )
+
+    # Perform power operation
+    result = np.power(x_safe, p_safe)
+
+    # Handle invalid results (e.g., NaN, inf)
+    result = np.nan_to_num(result, nan=MIN_FLOAT, posinf=MAX_FLOAT, neginf=-MAX_FLOAT)
+
+    # Clip the final result
+    return np.clip(result, -MAX_FLOAT, MAX_FLOAT)
 
 
 def safe_exp(x: np.ndarray) -> np.ndarray:
-    """Applies exponential safely, avoiding overflow."""
-    return np.exp(np.clip(x, -np.log(MAX_FLOAT), np.log(MAX_FLOAT)))
+    """Apply exponential safely, avoiding overflow."""
+    return np.exp(clip_values(x, -MAX_EXP, MAX_EXP))
 
 
 def safe_log2(x: np.ndarray) -> np.ndarray:
-    """Applies log base 2 safely."""
-    return np.log2(np.clip(x, MIN_FLOAT, MAX_FLOAT))
+    """Apply log base 2 safely."""
+    return np.log2(clip_values(x, MIN_FLOAT, MAX_FLOAT))
 
 
 def safe_log10(x: np.ndarray) -> np.ndarray:
-    """Applies log base 10 safely."""
-    return np.log10(np.clip(x, MIN_FLOAT, MAX_FLOAT))
+    """Apply log base 10 safely."""
+    return np.log10(clip_values(x, MIN_FLOAT, MAX_FLOAT))
 
 
 # Classe Operator
@@ -108,10 +143,7 @@ UNARY_OPERATORS = [
     Operator(name="sin", function=np.sin, arity=1, symbol="sin",  numpy_symbol="np.sin", latex_symbol=r"\sin(x)", cost=0.7198, precedence=5),
     Operator(name="cos", function=np.cos, arity=1, symbol="cos",  numpy_symbol="np.cos", latex_symbol=r"\cos(x)", cost=0.7194, precedence=5),
     Operator(name="tan", function=np.tan, arity=1, symbol="tan",  numpy_symbol="np.tan", latex_symbol=r"\tan(x)", cost=0.4061, precedence=5),
-    Operator(name="tanh", function=np.tanh, arity=1, symbol="tanh",  numpy_symbol="np.tanh", latex_symbol=r"\tanh(x)", cost=0.3009, precedence=5),
-    Operator(name="pow2", function=lambda x: np.power(x, 2), arity=1, symbol="pow2",  numpy_symbol="np.square", latex_symbol=r"x^2", cost=0.0441, precedence=3),
-    Operator(name="pow3", function=lambda x: np.power(x, 3), arity=1, symbol="pow3",  numpy_symbol="np.power", latex_symbol=r"x^3", cost=0.0679, precedence=3),
-]
+   ]
 
 # Definizione degli operatori binari
 BINARY_OPERATORS = [
@@ -122,9 +154,7 @@ BINARY_OPERATORS = [
     Operator(name="pow", function=safe_power, arity=2, symbol="^",  numpy_symbol="np.power", latex_symbol="^", cost=0.8958, precedence=3),
     Operator(name="min", function=lambda x, y: np.minimum(x, y), arity=2, symbol="min",  numpy_symbol="np.minimum", latex_symbol=r"\min(x, y)", cost=0.0608, precedence=1),
     Operator(name="max", function=lambda x, y: np.maximum(x, y), arity=2, symbol="max",  numpy_symbol="np.maximum", latex_symbol=r"\max(x, y)", cost=0.0618, precedence=1),
-    Operator(name="hypot", function=np.hypot, arity=2, symbol="hypot",  numpy_symbol="np.hypot", latex_symbol=r"\hypot(x, y)", cost=0.2008, precedence=2),
-    Operator(name="mod", function=lambda x, y: np.mod(x, y), arity=2, symbol="%",  numpy_symbol="np.mod", latex_symbol=r"x \mod y", cost=1.0000, precedence=2),
-]
+ ]
 
 # Dizionario per accesso rapido
 ALL_OPERATORS = {op.name: op for op in UNARY_OPERATORS + BINARY_OPERATORS}

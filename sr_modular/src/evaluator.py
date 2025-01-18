@@ -7,6 +7,12 @@ class Evaluator:
     degli alberi generati dalla programmazione genetica (GP).
     """
 
+    
+    @staticmethod
+    def check_validity(array: np.ndarray) -> bool:
+        """Check if an array contains NaN, infinity, or values outside the allowed range."""
+        return not np.any(np.isnan(array)) and np.all(np.isfinite(array))
+
     @staticmethod
     def calculate_mse(tree, x, y):
         """
@@ -21,8 +27,10 @@ class Evaluator:
             float: Il valore dell'MSE.
         """
         y_pred = evaluate_tree(tree, x)
+        # if not Evaluator.check_validity(y_pred):
+        #     raise ValueError("La formula ha generato NaN o numeri non validi.")
         return np.mean((y - y_pred) ** 2)
-
+    
     @staticmethod
     def fitness_function(tree, x, y, bloat_penalty):
         """

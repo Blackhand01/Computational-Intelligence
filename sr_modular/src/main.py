@@ -1,17 +1,17 @@
 import numpy as np
-import random
 from pathlib import Path
-from gp import GeneticProgramming
-from tree import generate_random_tree, tree_to_expression
+from gp.evolution import GeneticProgramming
+from tree import tree_to_expression
 from evaluator import Evaluator
-from gp_config import POP_SIZE, MAX_DEPTH, N_GENERATIONS, BLOAT_PENALTY
+from gp_config import BLOAT_PENALTY, N_GENERATIONS
+from utils import update_formula_in_file
 
 # ==============================================
 #         FUNZIONE PRINCIPALE DEL PROGETTO
 # ==============================================
 def main():
     data_dir = './data/raw/'  # Directory dei file dati
-    output_dir = './output/'  # Directory di output
+    output_file = './src/s333971.py'  # File di output per la formula
 
     # Trova tutti i file .npz nella directory data_dir
     data_files = sorted(Path(data_dir).glob('*.npz'))
@@ -29,39 +29,30 @@ def main():
         data = np.load(data_file)
         x, y = data['x'], data['y']
 
-        # Normalizzazione opzionale
-        x = (x - np.mean(x, axis=1, keepdims=True)) / (np.std(x, axis=1, keepdims=True) + 1e-8)
-        y = (y - np.mean(y)) / (np.std(y) + 1e-8)
+        # Se necessario, trasponi x
+        if x.shape[0] > x.shape[1]:
+            x = x.T
 
-        # Inizializzazione popolazione
-        population = [
-            generate_random_tree(MAX_DEPTH, x.shape[0], grow=random.random() > 0.5)
-            for _ in range(POP_SIZE)
-        ]
+        # Esegue la programmazione genetica
+        gp = GeneticProgramming()
+        best_individual = gp.run_gp(x, y, n_features=x.shape[0], generations=N_GENERATIONS, bloat_penalty=BLOAT_PENALTY)
 
-        best_individual = None
-        best_fitness = float('inf')
-
-        # Evoluzione
-        for generation in range(N_GENERATIONS):
-            print(f"Generazione {generation + 1}/{N_GENERATIONS}")
-            population = GeneticProgramming.evolve_population(population, x, y, x.shape[0], generation)
-
-            # Miglior individuo della generazione
-            evaluator = Evaluator()
-            current_best, current_fitness = evaluator.get_best_individual(population, x, y, BLOAT_PENALTY)
-
-            if current_fitness < best_fitness:
-                best_fitness = current_fitness
-                best_individual = current_best
-
-            print(f"Fitness migliore della generazione: {current_fitness:.4f}")
+        # Calcolo della fitness migliore
+        evaluator = Evaluator()
+        best_fitness = evaluator.fitness_function(best_individual, x, y, BLOAT_PENALTY)
 
         # Formula finale
         best_expression = tree_to_expression(best_individual)
         print(f"\n=== Risultati per Problem {problem_id} ===")
         print(f"Miglior formula trovata: {best_expression}")
         print(f"Fitness finale: {best_fitness:.4f}")
+
+        # Salva la formula nel file
+        update_formula_in_file(
+            formula_str=best_expression,
+            file_path=output_file,
+            function_name=f'f{problem_id}'
+        )
 
 if __name__ == "__main__":
     main()

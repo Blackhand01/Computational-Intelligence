@@ -47,6 +47,7 @@ def tree_depth(node):
         return 1
     return 1 + max(tree_depth(child) for child in node.children)
 
+
 # Generazione casuale dell'albero
 def generate_random_tree(max_depth, n_features, grow=True):
     if max_depth == 0:
@@ -60,11 +61,12 @@ def generate_random_tree(max_depth, n_features, grow=True):
         op = random.choice([op.name for op in ALL_OPERATORS.values() if op.arity == 1])
         child = generate_random_tree(max_depth - 1, n_features, grow)
         return Node(op=op, children=[child])
-    else:
+    else:  # node_type == 'binary'
         op = random.choice([op.name for op in ALL_OPERATORS.values() if op.arity == 2])
         left_child = generate_random_tree(max_depth - 1, n_features, grow)
         right_child = generate_random_tree(max_depth - 1, n_features, grow)
         return Node(op=op, children=[left_child, right_child])
+
 
 # Valutazione dell'albero
 def evaluate_tree(node, x):
@@ -83,9 +85,20 @@ def evaluate_tree(node, x):
     if operator.arity == 1:
         return operator.function(evaluate_tree(node.children[0], x))
     elif operator.arity == 2:
+        if len(node.children) < 2:
+            raise ValueError(f"Nodo binario {node.op} ha meno di due figli: {node.children}")
         left = evaluate_tree(node.children[0], x)
         right = evaluate_tree(node.children[1], x)
         return operator.function(left, right)
+    
+def validate_tree(node):
+    if node.op is None:
+        return True
+    operator = ALL_OPERATORS.get(node.op)
+    if operator.arity != len(node.children):
+        raise ValueError(f"Nodo {node.op} ha un numero errato di figli: {len(node.children)}")
+    return all(validate_tree(child) for child in node.children)
+
 
 # Copia di un albero
 def copy_tree(node):
@@ -145,6 +158,6 @@ def tree_to_expression(node):
     elif operator.arity == 2:
         left = tree_to_expression(node.children[0])
         right = tree_to_expression(node.children[1])
-        return f"({left} {operator.numpy_symbol} {right})"
+        return f"{operator.numpy_symbol}({left}, {right})"
 
     return "0"
