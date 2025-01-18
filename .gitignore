@@ -31,3 +31,5 @@ symbolic_regression
 symbolic_regression_2
 rl-sr
 sr_test
+sr_modular/data
+sr_modular/scripts
