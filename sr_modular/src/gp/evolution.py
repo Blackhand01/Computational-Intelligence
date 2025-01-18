@@ -1,5 +1,5 @@
 import random
-from tree import generate_random_tree, copy_tree
+from tree import Node 
 from gp.mutation import mutate
 from gp.crossover import crossover
 from gp.selection import tournament_selection
@@ -12,7 +12,7 @@ def generate_population(max_depth, n_features):
     Crea la popolazione iniziale.
     """
     population = [
-        generate_random_tree(max_depth, n_features, grow=random.random() > 0.5)
+        Node.generate_random_tree(max_depth, n_features, grow=random.random() > 0.5)
         for _ in range(POP_SIZE)
     ]
     return population
@@ -31,7 +31,7 @@ def evolve_population(population, x, y, n_features, generation, bloat_penalty):
         if random.random() < CROSSOVER_RATE:
             off1, off2 = crossover(parent1, parent2)
         else:
-            off1, off2 = copy_tree(parent1), copy_tree(parent2)
+            off1, off2 = Node.copy_tree(parent1), Node.copy_tree(parent2)
 
         if random.random() < MUTATION_RATE:
             off1 = mutate(off1, n_features)
@@ -44,7 +44,7 @@ def evolve_population(population, x, y, n_features, generation, bloat_penalty):
 
     if generation % PARTIAL_REINIT_EVERY == 0 and generation != 0:
         for i in range(int(PARTIAL_REINIT_RATIO * POP_SIZE)):
-            new_population[-(i + 1)] = generate_random_tree(MAX_DEPTH, n_features, grow=True)
+            new_population[-(i + 1)] = Node.generate_random_tree(MAX_DEPTH, n_features, grow=True)
 
     return new_population
 

@@ -1,7 +1,7 @@
-from tree import copy_tree
+from tree import Node
 from gp.utils import get_random_node
 
-def crossover(parent1, parent2):
+def crossover(parent1: Node, parent2: Node):
     """
     Applica il crossover tra due alberi genitori.
 
@@ -12,8 +12,8 @@ def crossover(parent1, parent2):
     Returns:
         Tuple[Node, Node]: Due figli risultanti dal crossover.
     """
-    child1 = copy_tree(parent1)
-    child2 = copy_tree(parent2)
+    child1 = parent1.copy_tree()
+    child2 = parent2.copy_tree()
     node1, _ = get_random_node(child1)
     node2, _ = get_random_node(child2)
 

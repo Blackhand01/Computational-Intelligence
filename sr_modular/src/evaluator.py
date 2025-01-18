@@ -1,5 +1,5 @@
 import numpy as np
-from tree import evaluate_tree, tree_size
+from tree import Node
 
 class Evaluator:
     """
@@ -26,7 +26,7 @@ class Evaluator:
         Returns:
             float: Il valore dell'MSE.
         """
-        y_pred = evaluate_tree(tree, x)
+        y_pred = Node.evaluate_tree(tree, x)
         # if not Evaluator.check_validity(y_pred):
         #     raise ValueError("La formula ha generato NaN o numeri non validi.")
         return np.mean((y - y_pred) ** 2)
@@ -46,7 +46,7 @@ class Evaluator:
             float: Il valore della fitness.
         """
         mse = Evaluator.calculate_mse(tree, x, y)
-        size = tree_size(tree)
+        size = Node.tree_size(tree)
         return mse + bloat_penalty * size
 
     @staticmethod

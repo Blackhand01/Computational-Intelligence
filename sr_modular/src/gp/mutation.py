@@ -1,5 +1,5 @@
 import random
-from tree import copy_tree, generate_random_tree, random_variable, random_constant
+from tree import Node, random_variable, random_constant
 from safe_math import ALL_OPERATORS
 from gp.utils import get_random_node
 
@@ -14,7 +14,7 @@ def mutate(individual, n_features):
     Returns:
         Node: Albero mutato.
     """
-    mutant = copy_tree(individual)
+    mutant = Node.copy_tree(individual)
     node, _ = get_random_node(mutant)
 
     if node.op is None:
@@ -29,7 +29,7 @@ def mutate(individual, n_features):
             valid_binaries = [op for op in ALL_OPERATORS.values() if op.arity == 2]
             node.op = random.choice(valid_binaries).name
             while len(node.children) < 2:
-                node.children.append(generate_random_tree(1, n_features, grow=True))
+                node.children.append(Node.generate_random_tree(1, n_features, grow=True))
 
     return mutant
 

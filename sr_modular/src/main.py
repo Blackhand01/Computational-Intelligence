@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 from gp.evolution import GeneticProgramming
-from tree import tree_to_expression
+from tree import Node
 from evaluator import Evaluator
 from gp_config import BLOAT_PENALTY, N_GENERATIONS
 from utils import update_formula_in_file
@@ -42,7 +42,7 @@ def main():
         best_fitness = evaluator.fitness_function(best_individual, x, y, BLOAT_PENALTY)
 
         # Formula finale
-        best_expression = tree_to_expression(best_individual)
+        best_expression = Node.tree_to_expression(best_individual)
         print(f"\n=== Risultati per Problem {problem_id} ===")
         print(f"Miglior formula trovata: {best_expression}")
         print(f"Fitness finale: {best_fitness:.4f}")
