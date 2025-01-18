@@ -210,3 +210,50 @@ class GeneticProgram:
 
         print(f"Fitness migliore trovato: {best_fitness:.6f}")
         return best_individual
+    
+
+sr_test/
+│
+├── README.md                 # Descrizione del progetto, istruzioni per l'uso e setup
+├── requirements.txt          # Dipendenze del progetto (es. numpy, PyYAML)
+├── .gitignore                # File per ignorare file/directory specifici nel repository Git
+│
+├── config/                     # File di configurazione
+│   ├── genetic_config.yaml       # Configurazione per l'algoritmo genetico
+│   ├── logging_config.yaml       # Configurazione per il sistema di logging
+│
+├── data/
+│   ├── raw/                  # Dati grezzi (input)
+│   │   ├── problem_0.npz
+│   │   ├── problem_1.npz
+│   │   └── ...              
+│
+├── output/
+│   ├── problem_0/ 
+│   │   ├── logs/            # Log delle esecuzioni
+│   |       └── ...
+│   │   ├── reports/         # Report generati automaticamente
+│   ├── problem_1/               
+│   │   ├── logs/            # Log delle esecuzioni
+│   │   ├── reports/         # Report generati automaticamente
+│   ├── problem_2/   
+│   │   └── ...              
+│   └── ...    
+│
+├── src/
+│   ├── main.py               # Script principale per eseguire l'algoritmo genetico
+│   ├── s333971.py            # File generato dinamicamente con la funzione finale trovata
+│   │
+│   ├── utils/                # Moduli di utilità
+│   │   ├── data_loader.py    # Modulo per il caricamento dei dataset
+│   │   ├── logging_manager.py # Modulo per la gestione avanzata del logging
+│   │   ├── config_loader.py  # Modulo per il caricamento dei file YAML di configurazione
+│   │   ├── operators.py      # Modulo con tutte le operazioni matematiche sicure con NumPy
+│   │   └── genetic_program.py # Algoritmo principale di programmazione genetica
+│   │
+│   ├── core/                 # Moduli principali del progetto
+│   │   ├── definitions.py      # Definizione degli operatori unari e binari
+│   │   ├── evaluation.py     # Funzioni per calcolare fitness, MSE, ecc.
+│   │   ├──  .py      # Gestione delle iterazioni generazionali (evoluzione)
+|   |   └── tree.py           # Implementazione della struttura ad albero
+│   │

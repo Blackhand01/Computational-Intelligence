@@ -20,7 +20,7 @@ def load_npz_file(file_path: str, output_dir: str = "outputs/plots", debug: bool
 
     data = np.load(file_path)
     x, y = data["x"], data["y"]
-
+    print(f"Dataset loaded: {x.shape}, {y.shape}")
     # Validazione: assicura che il numero di campioni corrisponda
     if x.shape[1] != len(y):
         raise ValueError(
