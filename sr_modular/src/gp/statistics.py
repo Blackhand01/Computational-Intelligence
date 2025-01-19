@@ -1,13 +1,16 @@
 import numpy as np
 import csv
 from evaluator import Evaluator
-from plotting import Plotter  # Importa il modulo Plotter
+from plotting import Plotter
+
 
 class GPStatistics:
-    def __init__(self):
+    def __init__(self, logger=None):
         """
         Inizializza le metriche.
         """
+        self.logger = logger  # Riferimento opzionale al logger
+
         self.history = {
             "generation": [],
             "best_fitness": [],
@@ -25,8 +28,11 @@ class GPStatistics:
         self.strategy_usage = {
             "selection": {},
             "crossover": {},
-            "mutation": {}
+            "mutation": {},
+            "local_search": {},
         }
+        # Salva le strategie attive nella generazione corrente
+        self.last_active_strategies = {}
 
     def update(self, population, x, y, bloat_penalty, best_fitness_current, active_strategies):
         """
@@ -56,7 +62,7 @@ class GPStatistics:
         # Diversity
         self.diversity = self.calculate_diversity(population, x, y, bloat_penalty)
 
-        # Fitness media
+        # Calcola la fitness media
         fitness_values = [
             Evaluator.fitness_function(ind, x, y, bloat_penalty) for ind in population
         ]
@@ -64,9 +70,7 @@ class GPStatistics:
 
         # Aggiorna l'uso delle strategie
         for strategy_type, strategy_name in active_strategies.items():
-            if strategy_name not in self.strategy_usage[strategy_type]:
-                self.strategy_usage[strategy_type][strategy_name] = 0
-            self.strategy_usage[strategy_type][strategy_name] += 1
+            self._update_strategy_usage(strategy_type, strategy_name)
 
         # Salva i dati storici
         self.history["generation"].append(self.current_generation)
@@ -74,6 +78,34 @@ class GPStatistics:
         self.history["average_fitness"].append(avg_fitness)
         self.history["diversity"].append(self.diversity)
         self.history["complexity"].append(self.complexity)
+        # Salva le strategie attive per la generazione corrente
+        self.last_active_strategies = active_strategies
+
+    def _update_strategy_usage(self, strategy_type, strategy_name):
+        """
+        Metodo interno per incrementare l'uso di una strategia.
+        """
+        if strategy_name not in self.strategy_usage[strategy_type]:
+            self.strategy_usage[strategy_type][strategy_name] = 0
+        self.strategy_usage[strategy_type][strategy_name] += 1
+
+    def update_single_strategy(self, strategy_type: str, old_strategy: str, new_strategy: str, reason: str = ""):
+        """
+        Aggiorna e registra il cambio di strategia. Notifica anche il logger.
+
+        Args:
+            strategy_type (str): Tipo di strategia (es. "mutation", "selection", ecc.).
+            old_strategy (str): Strategia precedente.
+            new_strategy (str): Nuova strategia attiva.
+            reason (str, optional): Motivo del cambiamento.
+        """
+        if old_strategy != new_strategy:
+            self._update_strategy_usage(strategy_type, new_strategy)
+            if self.logger:
+                message = [f"{strategy_type.capitalize()} strategy changed from {old_strategy} to {new_strategy}"]
+                if reason:
+                    message.append(f"Reason: {reason}")
+                self.logger.log_message(message)
 
     def calculate_diversity(self, population, x, y, bloat_penalty) -> float:
         """
@@ -89,17 +121,11 @@ class GPStatistics:
             float: Valore della diversità.
         """
         evaluator = Evaluator()
-        fits = [
-            evaluator.fitness_function(ind, x, y, bloat_penalty) 
-            for ind in population
-        ]
-
+        fits = [evaluator.fitness_function(ind, x, y, bloat_penalty) for ind in population]
         fits = np.array(fits)
         fits = fits[np.isfinite(fits)]
-
         if len(fits) == 0:
             return 0.0
-
         fits_normalized = (fits - np.min(fits)) / (np.ptp(fits) + 1e-10)
         return float(np.std(fits_normalized))
 
@@ -143,6 +169,18 @@ class GPStatistics:
         Restituisce un dizionario con l'uso delle strategie.
         """
         return self.strategy_usage
+
+    def log_current_strategies(self):
+        """
+        Invia al logger un messaggio che riassume le strategie attive nella generazione corrente.
+        """
+        if self.logger and self.last_active_strategies:
+            strategies_msg = "Active strategies in Generation {}: ".format(self.current_generation)
+            strategies_parts = []
+            for strategy_type, strategy in self.last_active_strategies.items():
+                strategies_parts.append(f"{strategy_type}={strategy}")
+            strategies_msg += ", ".join(strategies_parts)
+            self.logger.log_message(strategies_msg)
 
     def generate_summary(self, output_dir="./output/plots"):
         """

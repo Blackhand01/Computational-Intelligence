@@ -3,7 +3,7 @@
 # ==============================================
 POP_SIZE = 100               # Dimensione della popolazione
 MAX_DEPTH = 5                # Profondità massima degli alberi iniziali
-N_GENERATIONS = 3          # Numero di generazioni
+N_GENERATIONS = 10          # Numero di generazioni
 TOURNAMENT_SIZE = 3          # Dimensione del torneo (per la selezione)
 MUTATION_RATE = 0.2          # Probabilità di mutazione
 CROSSOVER_RATE = 0.8         # Probabilità di crossover

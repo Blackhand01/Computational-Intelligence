@@ -11,11 +11,10 @@ class LocalSearchManager:
     (es. hill climbing, random improvement, best-subtree replacement, ecc.)
     allo scopo di migliorare localmente i singoli individui.
     """
-    def __init__(self, statistics, logger):
+    def __init__(self, statistics):
         self.statistics = statistics
         self.evaluator = Evaluator()
         self.active_strategy = "hill_climb"  # Strategia di default
-        self.logger = logger
 
     def hill_climb(self, individual: Node, x: np.ndarray, y: np.ndarray, bloat_penalty: float) -> Node:
         """
@@ -27,31 +26,24 @@ class LocalSearchManager:
         current_fitness = self.evaluator.fitness_function(individual, x, y, bloat_penalty)
         candidate = individual.copy_tree()
 
-        # Esempio di piccola modifica: sostituisco un nodo a caso con uno generato casualmente
+        # Modifica il nodo casuale
         node, _ = Node.get_random_node(candidate)
 
-        # Se è un nodo interno, cambio operatore ma mantengo l'arity
-        if node.op is not None:
+        if node.op is not None:  # Nodo interno
             current_arity = ALL_OPERATORS[node.op].arity
             valid_ops = [op for op in ALL_OPERATORS.values() if op.arity == current_arity]
             node.op = random.choice(valid_ops).name
-        else:
-            # Se foglia, variabile o costante
+        else:  # Nodo foglia
             if node.is_variable():
                 node.value = ('const', random.uniform(-1, 1))
             else:
                 var_index = random.randint(0, x.shape[0] - 1)
                 node.value = ('x', var_index)
 
-        # Valuto la fitness della soluzione modificata
+        # Valuta la fitness della soluzione modificata
         new_fitness = self.evaluator.fitness_function(candidate, x, y, bloat_penalty)
 
-        if new_fitness < current_fitness:
-            self.logger.info(f"Hill climb improved fitness from {current_fitness:.4f} to {new_fitness:.4f}.")
-            return candidate
-        else:
-            self.logger.info(f"Hill climb did not improve fitness: {current_fitness:.4f}.")
-            return individual
+        return candidate if new_fitness < current_fitness else individual
 
     def random_improvement(self, individual: Node, x: np.ndarray, y: np.ndarray, bloat_penalty: float) -> Node:
         """
@@ -60,16 +52,17 @@ class LocalSearchManager:
         """
         current_fitness = self.evaluator.fitness_function(individual, x, y, bloat_penalty)
         best_candidate = individual
-        n_tries = 3  # Prova alcune piccole mutazioni casuali
+        n_tries = 3
 
         for _ in range(n_tries):
             candidate = individual.copy_tree()
             node, _ = Node.get_random_node(candidate)
-            if node.op is not None:
+
+            if node.op is not None:  # Nodo interno
                 current_arity = ALL_OPERATORS[node.op].arity
                 valid_ops = [op for op in ALL_OPERATORS.values() if op.arity == current_arity]
                 node.op = random.choice(valid_ops).name
-            else:
+            else:  # Nodo foglia
                 if node.is_variable():
                     node.value = ('const', random.uniform(-1, 1))
                 else:
@@ -80,7 +73,6 @@ class LocalSearchManager:
             if new_fitness < current_fitness:
                 best_candidate = candidate
                 current_fitness = new_fitness
-                self.logger.info(f"Random improvement found better fitness: {new_fitness:.4f}.")
 
         return best_candidate
 
@@ -96,33 +88,32 @@ class LocalSearchManager:
         node.replace_with(new_subtree)
         new_fitness = self.evaluator.fitness_function(candidate, x, y, bloat_penalty)
 
-        if new_fitness < current_fitness:
-            self.logger.info(f"Best subtree replacement improved fitness from {current_fitness:.4f} to {new_fitness:.4f}.")
-            return candidate
-        else:
-            self.logger.info(f"Best subtree replacement did not improve fitness: {current_fitness:.4f}.")
-            return individual
+        return candidate if new_fitness < current_fitness else individual
 
     def choose_strategy(self):
         """
         Sceglie dinamicamente la strategia di local search in base alle statistiche globali.
         """
         previous_strategy = self.active_strategy
+        reason = "Default strategy"
 
-        if self.statistics.get("complexity", 0) > 15:
+        if self.statistics.complexity > 15:
             self.active_strategy = "hill_climb"
-        elif self.statistics.get("diversity", 0) < 3:
+            reason = "High complexity (>15)"
+        elif self.statistics.diversity < 3:
             self.active_strategy = "best_subtree_replacement"
+            reason = "Low diversity (<3)"
         else:
             self.active_strategy = "random_improvement"
+            reason = "Default conditions"
 
-        if self.active_strategy != previous_strategy:
-            self.logger.info(
-                [
-                    f"Local search strategy changed from {previous_strategy} to {self.active_strategy}.",
-                    f"Reason: complexity={self.statistics.get('complexity', 0):.2f}, diversity={self.statistics.get('diversity', 0):.2f}."
-                ]
-            )
+        # Aggiorna il cambiamento di strategia tramite GPStatistics
+        self.statistics.update_single_strategy(
+            strategy_type="local_search",
+            old_strategy=previous_strategy,
+            new_strategy=self.active_strategy,
+            reason=reason
+        )
 
     def local_search(self, individual: Node, x: np.ndarray, y: np.ndarray, bloat_penalty: float) -> Node:
         """

@@ -2,23 +2,32 @@ import random
 from tree import Node
 
 class AdaptiveCrossoverManager:
-    def __init__(self, statistics, logger=None):
+    """
+    Gestore adattivo dei crossover per la programmazione genetica.
+    
+    Questa classe permette di selezionare e applicare dinamicamente diverse strategie
+    di crossover, in base alle statistiche dell'evoluzione.
+    """
+
+    def __init__(self, statistics):
         """
-        Adaptive crossover manager for genetic programming.
+        Inizializza il gestore adattivo dei crossover.
 
         Args:
-            statistics (dict): Dictionary containing statistics for decision-making.
-            logger (Logger, optional): Logger for recording strategy changes.
+            statistics (GPStatistics): Oggetto che traccia statistiche e dati sull'evoluzione.
+            logger (Logger, opzionale): Oggetto per registrare eventi e cambi di strategia.
         """
         self.statistics = statistics
-        self.logger = logger
-        self.active_strategy = "one_point"  # Default strategy
-        self.previous_strategy = None  # To track changes in strategy
+        self.active_strategy = "one_point"  # Strategia predefinita
 
     def subtree_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
-        Subtree crossover strategy:
-        - Selects a random node in parent1 and parent2, swaps the subtrees.
+        Strategia di crossover per sottoalberi:
+        - Seleziona casualmente un nodo da entrambi i genitori.
+        - Scambia i sottoalberi radicati nei nodi selezionati.
+
+        Questa strategia favorisce grandi cambiamenti nella struttura degli alberi,
+        utile per aumentare la diversità nella popolazione.
         """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
@@ -26,7 +35,7 @@ class AdaptiveCrossoverManager:
         node1, _ = Node.get_random_node(child1)
         node2, _ = Node.get_random_node(child2)
 
-        # Swap operations and children
+        # Scambia le informazioni tra i nodi selezionati
         node1.op, node2.op = node2.op, node1.op
         node1.value, node2.value = node2.value, node1.value
         node1.children, node2.children = node2.children, node1.children
@@ -35,8 +44,10 @@ class AdaptiveCrossoverManager:
 
     def one_point_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
-        One-point crossover strategy:
-        - Swaps a single child node between parent1 and parent2.
+        Strategia di crossover a singolo punto:
+        - Scambia il primo figlio di due nodi casualmente selezionati nei genitori.
+        
+        Utile per generare variazioni locali mantenendo gran parte della struttura originale.
         """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
@@ -44,7 +55,6 @@ class AdaptiveCrossoverManager:
         node1, _ = Node.get_random_node(child1)
         node2, _ = Node.get_random_node(child2)
 
-        # Swap only the first child if both nodes have children
         if len(node1.children) >= 1 and len(node2.children) >= 1:
             node1.children[0], node2.children[0] = node2.children[0], node1.children[0]
 
@@ -52,8 +62,10 @@ class AdaptiveCrossoverManager:
 
     def uniform_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
-        Uniform crossover strategy:
-        - Randomly selects genes from both parents for the offspring.
+        Strategia di crossover uniforme:
+        - Per ogni nodo corrispondente nei due genitori, scambia casualmente le informazioni.
+        
+        Utile per una combinazione più equilibrata delle caratteristiche dei genitori.
         """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
@@ -67,8 +79,10 @@ class AdaptiveCrossoverManager:
 
     def blended_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
-        Blended crossover strategy:
-        - Combines numerical values from parents to create offspring.
+        Strategia di crossover misto:
+        - Combina i valori numerici dei nodi corrispondenti tra i due genitori.
+        
+        Ideale per problemi con parametri continui, promuovendo una mediazione tra i genitori.
         """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
@@ -82,39 +96,43 @@ class AdaptiveCrossoverManager:
 
     def noop_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
-        No-operation crossover strategy (useful for testing).
+        Strategia di non-crossover:
+        - Restituisce copie esatte dei genitori, senza modifiche.
+        
+        Utile per testare altri aspetti del sistema o per mantenere invariati alcuni individui.
         """
         return parent1.copy_tree(), parent2.copy_tree()
 
     def choose_strategy(self):
         """
-        Choose the active crossover strategy based on statistics and log the reason for changes.
+        Cambia la strategia attiva in base alle statistiche attuali.
         """
-        new_strategy = self.active_strategy  # Default to current strategy
-        reason = "Default strategy (one_point)"
+        old_strategy = self.active_strategy
+        new_strategy = old_strategy  # Mantiene la strategia corrente come predefinita
+        reason = "Strategia predefinita (one_point)"
 
-        if self.statistics.get("complexity", 0) > 10:
+        if self.statistics.complexity > 10:
             new_strategy = "blended"
-            reason = "High complexity (>10)"
-        elif self.statistics.get("diversity", 0) < 5:
+            reason = "Alta complessità (>10)"
+        elif self.statistics.diversity < 5:
             new_strategy = "uniform"
-            reason = "Low diversity (<5)"
-        elif self.statistics.get("stagnation", False):
+            reason = "Bassa diversità (<5)"
+        elif self.statistics.generations_no_improvement > 5:
             new_strategy = "subtree"
-            reason = "Stagnation detected"
+            reason = "Stagnazione rilevata"
 
-        # Log if the strategy changes
-        if new_strategy != self.active_strategy:
-            self.previous_strategy = self.active_strategy
-            self.active_strategy = new_strategy
-            if self.logger:
-                self.logger.info(
-                    [f"Crossover strategy changed from {self.previous_strategy} to {self.active_strategy}", f"Reason: {reason}"]
-                )
-                
+        self.statistics.update_single_strategy(
+            strategy_type="crossover",
+            old_strategy=old_strategy,
+            new_strategy=new_strategy,
+            reason=reason
+        )
+
+        self.active_strategy = new_strategy
+
     def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
-        Apply the selected crossover strategy to the parents.
+        Applica la strategia di crossover selezionata ai genitori forniti.
         """
         self.choose_strategy()
         strategies = {
@@ -128,6 +146,6 @@ class AdaptiveCrossoverManager:
 
     def get_active_strategy(self) -> str:
         """
-        Return the currently active strategy.
+        Restituisce la strategia di crossover attualmente attiva.
         """
         return self.active_strategy

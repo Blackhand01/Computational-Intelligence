@@ -1,9 +1,7 @@
-
 # ==============================================
 # Funzione per salvare la formula migliore in un file
 # ==============================================
 from pathlib import Path
-
 import numpy as np
 from tqdm import tqdm
 
@@ -45,7 +43,7 @@ def update_formula_in_file(formula_str, file_path, function_name):
 
 def initialize_experiment(data_file, base_output_dir):
     """
-    Inizializza i percorsi, logger e directory per un esperimento.
+    Inizializza i percorsi, il logger e le directory per un esperimento.
 
     Args:
         data_file (Path): Percorso al file dei dati.
@@ -54,6 +52,7 @@ def initialize_experiment(data_file, base_output_dir):
     Returns:
         dict: Contiene le configurazioni iniziali dell'esperimento.
     """
+    # Estrae l'ID del problema dall'ultimo elemento del nome del file
     problem_id = data_file.stem.split('_')[-1]
     problem_dir = Path(base_output_dir) / f"problem_{problem_id}"
     log_dir = problem_dir / "logs"
@@ -75,6 +74,7 @@ def initialize_experiment(data_file, base_output_dir):
         "logger": logger
     }
 
+
 def load_data(data_file):
     """
     Carica i dati dal file specificato.
@@ -91,6 +91,7 @@ def load_data(data_file):
         x = x.T
     return x, y
 
+
 def run_genetic_programming(x, y, logger):
     """
     Esegue l'algoritmo di programmazione genetica.
@@ -103,13 +104,14 @@ def run_genetic_programming(x, y, logger):
     Returns:
         tuple: L'individuo migliore e le statistiche del GP.
     """
-    stats = GPStatistics()
+    # Istanzia GPStatistics passando il logger per poter registrare i cambi di strategia
+    stats = GPStatistics(logger)
     logger.info("Initializing Genetic Programming.")
+    
     gp = GeneticProgramming(
         n_features=x.shape[0],
         generations=N_GENERATIONS,
         bloat_penalty=BLOAT_PENALTY,
-        logger=logger,
         stats=stats
     )
 
@@ -119,6 +121,7 @@ def run_genetic_programming(x, y, logger):
 
     return best_individual, stats
 
+
 def save_results(best_individual, stats, output_file, function_name, plot_dir):
     """
     Salva i risultati dell'esperimento.
@@ -126,7 +129,7 @@ def save_results(best_individual, stats, output_file, function_name, plot_dir):
     Args:
         best_individual (Node): L'individuo migliore.
         stats (GPStatistics): Statistiche del GP.
-        output_file (str): File per salvare la formula.
+        output_file (str): File in cui salvare la formula.
         function_name (str): Nome della funzione da aggiornare.
         plot_dir (Path): Directory per i grafici.
     """
@@ -138,5 +141,6 @@ def save_results(best_individual, stats, output_file, function_name, plot_dir):
         function_name=function_name
     )
 
+    # Crea e salva tutti i grafici tramite il Plotter
     plotter = Plotter(plot_dir=str(plot_dir), plot_dir_prefix=function_name, history=stats.history)
     plotter.save_all_plots(strategy_usage=stats.strategy_usage)

@@ -1,16 +1,12 @@
-
-
 from datetime import datetime
 from pathlib import Path
-
 from utils import initialize_experiment, load_data, run_genetic_programming, save_results
-
+from gp.statistics import GPStatistics
 
 def main():
-    data_dir = './data/'
+    data_dir = './data/raw'
     output_file = './src/s333971.py'
     base_output_dir = './output/'
-
     data_files = sorted(Path(data_dir).glob('*.npz'))
 
     if not data_files:
@@ -21,6 +17,10 @@ def main():
         experiment_successful = True
         start_time = datetime.now()
         reason = "Max generations reached"
+        
+        # Inizializzo stats a None
+        stats = None  
+        best_individual = None
 
         try:
             experiment_config = initialize_experiment(data_file, base_output_dir)
@@ -28,9 +28,13 @@ def main():
 
             logger.info(f"Processing Problem {experiment_config['problem_id']}")
 
+            # Carico i dati
             x, y = load_data(data_file)
+
+            # Eseguo GP: la funzione restituisce best_individual, stats
             best_individual, stats = run_genetic_programming(x, y, logger)
 
+            # Salvo i risultati
             save_results(
                 best_individual=best_individual,
                 stats=stats,
@@ -42,21 +46,30 @@ def main():
         except Exception as e:
             experiment_successful = False
             reason = f"Error: {str(e)}"
-            logger.info(f"Error processing Problem {experiment_config['problem_id']}: {reason}")
+            if 'logger' in locals():
+                logger.info(f"Error processing Problem {experiment_config['problem_id']}: {reason}")
             print(f"Error processing Problem {experiment_config['problem_id']}: {reason}")
 
         finally:
             end_time = datetime.now()
             total_time = (end_time - start_time).total_seconds()
-            logger.generate_summary(
-                stats=stats if 'stats' in locals() else None,
-                best_expression=best_individual.tree_to_expression() if 'best_individual' in locals() else "N/A",
-                total_time=total_time,
-                start_time=start_time,
-                end_time=end_time,
-                reason=reason,
-                success=experiment_successful
-            )
+
+            # Se stats è None, evito di chiamare get_strategy_usage
+            if stats is not None:
+                logger.generate_summary(
+                    stats=stats,
+                    best_expression=best_individual.tree_to_expression() if best_individual else "N/A",
+                    total_time=total_time,
+                    start_time=start_time,
+                    end_time=end_time,
+                    reason=reason,
+                    success=experiment_successful
+                )
+            else:
+                # Loggo comunque un piccolo summary
+                logger.log_message(
+                    "No GPStatistics available. Possibly an error occurred before stats was set."
+                )
 
     print("All experiments completed.")
 

@@ -2,28 +2,39 @@ import random
 import numpy as np
 from tree import Node
 from evaluator import Evaluator
+
+
 class AdaptiveSelectionManager:
-    def __init__(self, statistics, logger=None):
+    """
+    Gestore adattivo della selezione per la programmazione genetica.
+
+    Questa classe consente di scegliere e applicare dinamicamente strategie di selezione
+    in base alle statistiche raccolte durante l'evoluzione.
+    """
+
+    def __init__(self, statistics):
         """
-        Adaptive selection manager for genetic programming.
+        Inizializza il gestore adattivo della selezione.
 
         Args:
-            statistics (dict): Dictionary containing statistics for decision-making.
-            logger (Logger, optional): Logger for recording strategy changes.
+            statistics (GPStatistics): Oggetto per tracciare le statistiche dell'evoluzione.
         """
         self.statistics = statistics
-        self.logger = logger
-        self.active_strategy = "elitist"  # Default strategy
-        self.previous_strategy = None  # To track changes in strategy
-        self.evaluator = Evaluator()
+        self.active_strategy = "elitist"  # Strategia predefinita
 
     def tournament_selection(self, population: list[Node], x, y, bloat_penalty: float, tournament_size=3) -> Node:
         """
-        Tournament selection strategy.
+        Strategia di selezione a torneo:
+        - Seleziona casualmente un gruppo di individui (competitors) dalla popolazione.
+        - Valuta la fitness di ogni individuo nel torneo.
+        - Restituisce l'individuo con la migliore fitness.
+
+        Questa strategia bilancia esplorazione ed exploitazione, consentendo a individui
+        meno adatti di partecipare al torneo, ma premiando quelli più performanti.
         """
         competitors = random.sample(population, tournament_size)
         fitness_values = [
-            self.evaluator.fitness_function(ind, x, y, bloat_penalty)
+            Evaluator.fitness_function(ind, x, y, bloat_penalty)
             for ind in competitors
         ]
         best_index = np.argmin(fitness_values)
@@ -31,13 +42,18 @@ class AdaptiveSelectionManager:
 
     def roulette_selection(self, population: list[Node], x, y, bloat_penalty: float) -> Node:
         """
-        Roulette wheel (fitness-proportionate) selection strategy.
+        Strategia di selezione a ruota della fortuna:
+        - Ogni individuo ottiene una probabilità di selezione proporzionale alla propria fitness.
+        - Gli individui con fitness migliore hanno una maggiore probabilità di essere scelti.
+
+        Questa strategia favorisce l'exploitazione dei migliori individui ma consente anche
+        agli individui peggiori di essere selezionati, mantenendo la diversità.
         """
         fitness_values = [
-            self.evaluator.fitness_function(ind, x, y, bloat_penalty)
+            Evaluator.fitness_function(ind, x, y, bloat_penalty)
             for ind in population
         ]
-        scores = [1 / (1 + f) for f in fitness_values]  # Convert fitness to scores
+        scores = [1 / (1 + f) for f in fitness_values]  # Conversione fitness in punteggi
         total = sum(scores)
         pick = random.random() * total
         current = 0
@@ -45,14 +61,19 @@ class AdaptiveSelectionManager:
             current += s
             if current > pick:
                 return ind
-        return population[-1]  # Fallback
+        return population[-1]  # Fallback nel caso non si selezioni nulla
 
     def rank_selection(self, population: list[Node], x, y, bloat_penalty: float) -> Node:
         """
-        Rank-based selection strategy.
+        Strategia di selezione basata sul rango:
+        - Ordina la popolazione in base alla fitness.
+        - Assegna una probabilità di selezione a ogni individuo in base al rango.
+        - Gli individui con rango migliore hanno maggiore probabilità di essere selezionati.
+
+        Utile per prevenire il dominio assoluto dei migliori individui e mantenere la diversità.
         """
         fitness_values = [
-            self.evaluator.fitness_function(ind, x, y, bloat_penalty)
+            Evaluator.fitness_function(ind, x, y, bloat_penalty)
             for ind in population
         ]
         sorted_indices = np.argsort(fitness_values)
@@ -62,10 +83,14 @@ class AdaptiveSelectionManager:
 
     def elitist_selection(self, population: list[Node], x, y, bloat_penalty: float) -> Node:
         """
-        Always selects the best individual.
+        Strategia di selezione elitista:
+        - Seleziona sempre l'individuo con la fitness migliore.
+
+        Questa strategia massimizza l'exploitazione, ma rischia di ridurre la diversità
+        della popolazione.
         """
         fitness_values = [
-            self.evaluator.fitness_function(ind, x, y, bloat_penalty)
+            Evaluator.fitness_function(ind, x, y, bloat_penalty)
             for ind in population
         ]
         best_index = np.argmin(fitness_values)
@@ -73,36 +98,35 @@ class AdaptiveSelectionManager:
 
     def choose_strategy(self):
         """
-        Choose the active selection strategy based on statistics and log the reason for changes.
+        Sceglie la strategia di selezione attiva in base alle statistiche e aggiorna GPStatistics.
         """
-        new_strategy = self.active_strategy  # Default to current strategy
-        reason = "Default strategy (elitist)"
+        old_strategy = self.active_strategy
+        new_strategy = old_strategy  # Strategia predefinita
+        reason = "Strategia predefinita (elitist)"
 
-        if self.statistics.get("complexity", 0) > 10:
+        if self.statistics.complexity > 10:
             new_strategy = "rank"
-            reason = "High complexity (>10)"
-        elif self.statistics.get("diversity", 0) < 5:
+            reason = "Alta complessità (>10)"
+        elif self.statistics.diversity < 5:
             new_strategy = "tournament"
-            reason = "Low diversity (<5)"
-        elif self.statistics.get("stagnation", False):
+            reason = "Bassa diversità (<5)"
+        elif self.statistics.generations_no_improvement > 5:
             new_strategy = "roulette"
-            reason = "Stagnation detected"
+            reason = "Stagnazione rilevata"
 
-        # Log if the strategy changes
-        if new_strategy != self.active_strategy:
-            self.previous_strategy = self.active_strategy
-            self.active_strategy = new_strategy
-            if self.logger:
-                self.logger.info(
-                    [
-                        f"Selection strategy changed from {self.previous_strategy} to {self.active_strategy}.",
-                        f"Reason: {reason}"
-                    ]
-                )
+        # Aggiorna la strategia tramite GPStatistics
+        self.statistics.update_single_strategy(
+            strategy_type="selection",
+            old_strategy=old_strategy,
+            new_strategy=new_strategy,
+            reason=reason
+        )
+
+        self.active_strategy = new_strategy
 
     def select(self, population: list[Node], x, y, bloat_penalty: float) -> Node:
         """
-        Apply the selected selection strategy to the population.
+        Applica la strategia di selezione attiva alla popolazione.
         """
         self.choose_strategy()
         strategies = {
@@ -115,6 +139,6 @@ class AdaptiveSelectionManager:
 
     def get_active_strategy(self) -> str:
         """
-        Return the currently active strategy.
+        Restituisce la strategia di selezione attualmente attiva.
         """
         return self.active_strategy
