@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from tree import Node 
+from tree import Node
 from gp.mutation import AdaptiveMutationManager
 from gp.crossover import AdaptiveCrossoverManager
 from gp.selection import AdaptiveSelectionManager
@@ -10,121 +10,126 @@ from gp_config import (
 from evaluator import Evaluator
 from gp.statistics import GPStatistics
 
-def generate_population(max_depth, n_features):
-    """
-    Crea la popolazione iniziale.
-    """
-    population = [
-        Node.generate_random_tree(max_depth, n_features, grow=random.random() > 0.5)
-        for _ in range(POP_SIZE)
-    ]
-    return population
-
-def evolve_population(population, x, y, n_features, generation, bloat_penalty, 
-                      selection_manager, crossover_manager, mutation_manager, stats):
-    """
-    Evoluzione della popolazione con manager adattivi.
-    """
-    evaluator = Evaluator()
-
-    # Ordina la popolazione per fitness
-    ranked_pop = sorted(population, key=lambda ind: evaluator.fitness_function(ind, x, y, bloat_penalty))
-    new_population = ranked_pop[:ELITISM]  # Elitismo
-
-    while len(new_population) < POP_SIZE:
-        # Seleziona genitori dinamicamente
-        parent1 = selection_manager.select(ranked_pop, x, y, bloat_penalty)
-        parent2 = selection_manager.select(ranked_pop, x, y, bloat_penalty)
-
-        # Crossover dinamico
-        if random.random() < CROSSOVER_RATE:
-            off1, off2 = crossover_manager.crossover(parent1, parent2)
-        else:
-            off1, off2 = Node.copy_tree(parent1), Node.copy_tree(parent2)
-
-        # Mutazione dinamica
-        if random.random() < MUTATION_RATE:
-            off1 = mutation_manager.mutate(off1, n_features)
-        if random.random() < MUTATION_RATE:
-            off2 = mutation_manager.mutate(off2, n_features)
-
-        new_population.append(off1)
-        if len(new_population) < POP_SIZE:
-            new_population.append(off2)
-
-    # Partial Reinitialization
-    if generation % PARTIAL_REINIT_EVERY == 0 and generation != 0:
-        for i in range(int(PARTIAL_REINIT_RATIO * POP_SIZE)):
-            new_population[-(i + 1)] = Node.generate_random_tree(MAX_DEPTH, n_features, grow=True)
-
-    return new_population
-
 class GeneticProgramming:
     """
-    Coordina la programmazione genetica con manager adattivi.
+    Class to coordinate the Genetic Programming process with adaptive managers.
     """
-    @staticmethod
-    def run_gp(x, y, n_features, generations, bloat_penalty, logger, stats, progress_bar=None):
+    def __init__(self, n_features, generations, bloat_penalty, logger, stats, progress_bar=None):
+        self.n_features = n_features
+        self.generations = generations
+        self.bloat_penalty = bloat_penalty
+        self.logger = logger
+        self.stats = stats
+        self.progress_bar = progress_bar
+        self.evaluator = Evaluator()
+
+        # Adaptive managers for selection, crossover, and mutation
+        self.selection_manager = AdaptiveSelectionManager(stats.get_stats_dict())
+        self.crossover_manager = AdaptiveCrossoverManager(stats.get_stats_dict())
+        self.mutation_manager = AdaptiveMutationManager(stats.get_stats_dict())
+
+    def generate_population(self):
         """
-        Esegue la programmazione genetica.
+        Create the initial population of trees.
+        """
+        return [
+            Node.generate_random_tree(MAX_DEPTH, self.n_features, grow=random.random() > 0.5)
+            for _ in range(POP_SIZE)
+        ]
+
+    def evolve_population(self, population, generation):
+        """
+        Evolve the population using adaptive strategies.
+        """
+        # Sort population by fitness
+        ranked_pop = sorted(
+            population,
+            key=lambda ind: self.evaluator.fitness_function(ind, self.x, self.y, self.bloat_penalty),
+        )
+        new_population = ranked_pop[:ELITISM]  # Elitism
+
+        while len(new_population) < POP_SIZE:
+            # Select parents dynamically
+            parent1 = self.selection_manager.select(ranked_pop, self.x, self.y, self.bloat_penalty)
+            parent2 = self.selection_manager.select(ranked_pop, self.x, self.y, self.bloat_penalty)
+
+            # Apply crossover dynamically
+            if random.random() < CROSSOVER_RATE:
+                off1, off2 = self.crossover_manager.crossover(parent1, parent2)
+            else:
+                off1, off2 = Node.copy_tree(parent1), Node.copy_tree(parent2)
+
+            # Apply mutation dynamically
+            if random.random() < MUTATION_RATE:
+                off1 = self.mutation_manager.mutate(off1, self.n_features)
+            if random.random() < MUTATION_RATE:
+                off2 = self.mutation_manager.mutate(off2, self.n_features)
+
+            new_population.append(off1)
+            if len(new_population) < POP_SIZE:
+                new_population.append(off2)
+
+        # Partial Reinitialization
+        if generation % PARTIAL_REINIT_EVERY == 0 and generation != 0:
+            for i in range(int(PARTIAL_REINIT_RATIO * POP_SIZE)):
+                new_population[-(i + 1)] = Node.generate_random_tree(MAX_DEPTH, self.n_features, grow=True)
+
+        return new_population
+
+    def run(self, x, y):
+        """
+        Execute the Genetic Programming process.
 
         Args:
             x (np.ndarray): Input features.
             y (np.ndarray): Target values.
-            n_features (int): Numero di feature disponibili.
-            generations (int): Numero di generazioni.
-            bloat_penalty (float): Penalità per la dimensione dell'albero.
-            logger (Logger): Logger per registrare informazioni.
-            stats (GPStatistics): Oggetto per raccogliere statistiche.
-            progress_bar (tqdm.tqdm): Barra di progresso opzionale.
 
         Returns:
-            Node: L'individuo migliore trovato.
+            Node: The best individual found.
         """
-        population = generate_population(MAX_DEPTH, n_features)
-        evaluator = Evaluator()
+        self.x = x
+        self.y = y
+        population = self.generate_population()
 
-        # Manager adattivi per selezione, crossover e mutazione
-        selection_manager = AdaptiveSelectionManager(stats.get_stats_dict())
-        crossover_manager = AdaptiveCrossoverManager(stats.get_stats_dict())
-        mutation_manager = AdaptiveMutationManager(stats.get_stats_dict())
-
-        for gen in range(generations):
-            # Trova il miglior individuo nella popolazione
-            current_best, current_fitness = evaluator.get_best_individual(population, x, y, bloat_penalty)
-
-            # Ottieni le strategie attive
-            active_strategies = {
-                "selection": selection_manager.get_active_strategy(),
-                "crossover": crossover_manager.get_active_strategy(),
-                "mutation": mutation_manager.get_active_strategy(),
-            }
-
-            # Aggiorna statistiche
-            stats.update(population, x, y, bloat_penalty, current_fitness, active_strategies)
-
-            # Passa le statistiche aggiornate ai manager
-            selection_manager.statistics = stats.get_stats_dict()
-            crossover_manager.statistics = stats.get_stats_dict()
-            mutation_manager.statistics = stats.get_stats_dict()
-
-            # Evoluzione della popolazione
-            population = evolve_population(
-                population, x, y, n_features, gen, bloat_penalty,
-                selection_manager, crossover_manager, mutation_manager, stats
+        for gen in range(self.generations):
+            # Get the best individual and its fitness
+            current_best, current_fitness = self.evaluator.get_best_individual(
+                population, self.x, self.y, self.bloat_penalty
             )
 
-            logger.info(
-                f"Generation {gen + 1}/{generations} - Best Fitness: {current_fitness:.4f}",
+            # Get active strategies
+            active_strategies = {
+                "selection": self.selection_manager.get_active_strategy(),
+                "crossover": self.crossover_manager.get_active_strategy(),
+                "mutation": self.mutation_manager.get_active_strategy(),
+            }
+
+            # Update statistics
+            self.stats.update(population, self.x, self.y, self.bloat_penalty, current_fitness, active_strategies)
+
+            # Update managers with new statistics
+            self.selection_manager.statistics = self.stats.get_stats_dict()
+            self.crossover_manager.statistics = self.stats.get_stats_dict()
+            self.mutation_manager.statistics = self.stats.get_stats_dict()
+
+            # Evolve population
+            population = self.evolve_population(population, gen)
+
+            # Log generation details
+            self.logger.info(
+                f"Generation {gen + 1}/{self.generations} - Best Fitness: {current_fitness:.4f}",
                 generation=gen + 1,
                 best_fitness=current_fitness,
-                avg_fitness=np.mean([evaluator.fitness_function(ind, x, y, bloat_penalty) for ind in population]),
-                diversity=stats.diversity,
-                complexity=stats.complexity,
+                avg_fitness=np.mean([
+                    self.evaluator.fitness_function(ind, self.x, self.y, self.bloat_penalty)
+                    for ind in population
+                ]),
+                diversity=self.stats.diversity,
+                complexity=self.stats.complexity,
                 strategies=active_strategies,
             )
 
-            if progress_bar:
-                progress_bar.update(1)
+            if self.progress_bar:
+                self.progress_bar.update(1)
 
         return current_best

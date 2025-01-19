@@ -48,18 +48,20 @@ def main():
 
             # Esecuzione della programmazione genetica con barra di progresso
             logger.info("Initializing Genetic Programming.")
-            gp = GeneticProgramming()
+            gp = GeneticProgramming(
+                n_features=x.shape[0],
+                generations=N_GENERATIONS,
+                bloat_penalty=BLOAT_PENALTY,
+                logger=logger,
+                stats=stats,
+                progress_bar=None  # Sarà passato dopo
+            )
+
             start_time = time.time()
 
             with tqdm(total=N_GENERATIONS, desc=f"Problem {problem_id}", unit="gen") as pbar:
-                best_individual = gp.run_gp(
-                    x, y, n_features=x.shape[0],
-                    generations=N_GENERATIONS,
-                    bloat_penalty=BLOAT_PENALTY,
-                    logger=logger,
-                    stats=stats,
-                    progress_bar=pbar  # Passa la barra di progresso
-                )
+                gp.progress_bar = pbar  # Passa la barra di progresso
+                best_individual = gp.run(x, y)
 
             end_time = time.time()
             total_time = end_time - start_time
