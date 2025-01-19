@@ -9,11 +9,13 @@ from gp_config import BLOAT_PENALTY, N_GENERATIONS
 from utils import update_formula_in_file
 from logger import Logger
 from gp.statistics import GPStatistics
+from plotting import Plotter
 import time
 
 def main():
     data_dir = './data/'
     output_file = './src/s333971.py'
+    base_output_dir = './output/'
 
     # Trova tutti i file .npz nella directory
     data_files = sorted(Path(data_dir).glob('*.npz'))
@@ -22,16 +24,27 @@ def main():
         print("No data files found in the directory.")
         return
 
-    experiment_successful = True  # Per monitorare il completamento globale
-
     for data_file in data_files:
+        # Configurazioni iniziali per l'esperimento
+        experiment_successful = True
+        start_time = datetime.now()
+        reason = "Max generations reached"
+        best_expression = None
+
         try:
-            # Estrarre l'ID del problema e configurare il logger specifico
+            # Estrarre l'ID del problema e configurare i percorsi
             problem_id = data_file.stem.split('_')[-1]
-            timestamp = datetime.now().strftime("%Y%m%d")
+            problem_dir = Path(base_output_dir) / f"problem_{problem_id}"
+            log_dir = problem_dir / "logs"
+            plot_dir = problem_dir / "plots"
+
+            log_dir.mkdir(parents=True, exist_ok=True)
+            plot_dir.mkdir(parents=True, exist_ok=True)
+
+            # Configura il logger
             logger = Logger(
-                log_dir=f"./output/problem_{problem_id}/logs/",
-                log_file_prefix=f"{timestamp}_problem_{problem_id}"
+                log_dir=str(log_dir),
+                log_file_prefix=f"problem_{problem_id}"
             )
 
             logger.info(f"Processing Problem {problem_id}")
@@ -46,25 +59,22 @@ def main():
             # Inizializzare le statistiche
             stats = GPStatistics()
 
-            # Esecuzione della programmazione genetica con barra di progresso
+            # Esecuzione della programmazione genetica
             logger.info("Initializing Genetic Programming.")
             gp = GeneticProgramming(
                 n_features=x.shape[0],
                 generations=N_GENERATIONS,
                 bloat_penalty=BLOAT_PENALTY,
                 logger=logger,
-                stats=stats,
-                progress_bar=None  # Sarà passato dopo
+                stats=stats
             )
 
-            start_time = time.time()
-
             with tqdm(total=N_GENERATIONS, desc=f"Problem {problem_id}", unit="gen") as pbar:
-                gp.progress_bar = pbar  # Passa la barra di progresso
+                gp.progress_bar = pbar
                 best_individual = gp.run(x, y)
 
-            end_time = time.time()
-            total_time = end_time - start_time
+            end_time = datetime.now()
+            total_time = (end_time - start_time).total_seconds()
 
             # Calcolo fitness e formula finale
             evaluator = Evaluator()
@@ -81,19 +91,35 @@ def main():
                 function_name=f'f{problem_id}'
             )
 
-            # Generazione del riepilogo
-            logger.generate_summary(stats, best_expression, total_time)
+            # Generazione dei grafici
+            plotter = Plotter(plot_dir=str(plot_dir), plot_dir_prefix=f"problem_{problem_id}", history=stats.history)
+            plotter.save_all_plots(
+                strategy_usage=stats.strategy_usage
+            )
 
         except Exception as e:
-            experiment_successful = False  # Segna l'esperimento come non completato
-            error_message = f"Error processing Problem {problem_id}: {str(e)}"
-            logger.info(error_message)
-            print(error_message)
+            experiment_successful = False
+            reason = f"Error: {str(e)}"
+            logger.info(f"Error processing Problem {problem_id}: {reason}")
+            print(f"Error processing Problem {problem_id}: {reason}")
 
-    if experiment_successful:
-        print("Experiment completed successfully.")
-    else:
-        print("Experiment completed with errors. Check logs for details.")
+        finally:
+            # Generazione del riepilogo
+            end_time = datetime.now()
+            total_time = (end_time - start_time).total_seconds()
+            logger.generate_summary(
+                stats=stats,
+                best_expression=best_expression if best_expression else "N/A",
+                total_time=total_time,
+                start_time=start_time,
+                end_time=end_time,
+                reason=reason,
+                success=experiment_successful
+            )
+
+    # Messaggio finale
+    print("All experiments completed.")
+
 
 if __name__ == "__main__":
     main()

@@ -2,11 +2,19 @@ import random
 import numpy as np
 from tree import Node
 from evaluator import Evaluator
-
 class AdaptiveSelectionManager:
-    def __init__(self, statistics):
+    def __init__(self, statistics, logger=None):
+        """
+        Adaptive selection manager for genetic programming.
+
+        Args:
+            statistics (dict): Dictionary containing statistics for decision-making.
+            logger (Logger, optional): Logger for recording strategy changes.
+        """
         self.statistics = statistics
+        self.logger = logger
         self.active_strategy = "elitist"  # Default strategy
+        self.previous_strategy = None  # To track changes in strategy
         self.evaluator = Evaluator()
 
     def tournament_selection(self, population: list[Node], x, y, bloat_penalty: float, tournament_size=3) -> Node:
@@ -65,16 +73,32 @@ class AdaptiveSelectionManager:
 
     def choose_strategy(self):
         """
-        Choose the active selection strategy based on statistics.
+        Choose the active selection strategy based on statistics and log the reason for changes.
         """
+        new_strategy = self.active_strategy  # Default to current strategy
+        reason = "Default strategy (elitist)"
+
         if self.statistics.get("complexity", 0) > 10:
-            self.active_strategy = "rank"
+            new_strategy = "rank"
+            reason = "High complexity (>10)"
         elif self.statistics.get("diversity", 0) < 5:
-            self.active_strategy = "tournament"
+            new_strategy = "tournament"
+            reason = "Low diversity (<5)"
         elif self.statistics.get("stagnation", False):
-            self.active_strategy = "roulette"
-        else:
-            self.active_strategy = "elitist"
+            new_strategy = "roulette"
+            reason = "Stagnation detected"
+
+        # Log if the strategy changes
+        if new_strategy != self.active_strategy:
+            self.previous_strategy = self.active_strategy
+            self.active_strategy = new_strategy
+            if self.logger:
+                self.logger.info(
+                    [
+                        f"Selection strategy changed from {self.previous_strategy} to {self.active_strategy}.",
+                        f"Reason: {reason}"
+                    ]
+                )
 
     def select(self, population: list[Node], x, y, bloat_penalty: float) -> Node:
         """

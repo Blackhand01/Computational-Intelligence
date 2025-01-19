@@ -3,9 +3,18 @@ from tree import Node, random_variable, random_constant
 from safe_math import ALL_OPERATORS
 
 class AdaptiveMutationManager:
-    def __init__(self, statistics):
+    def __init__(self, statistics, logger=None):
+        """
+        Adaptive mutation manager for genetic programming.
+
+        Args:
+            statistics (dict): Dictionary containing statistics for decision-making.
+            logger (Logger, optional): Logger for recording strategy changes.
+        """
         self.statistics = statistics
+        self.logger = logger
         self.active_strategy = "simple"  # Default strategy
+        self.previous_strategy = None  # To track changes in strategy
 
     def simple_mutation(self, individual: Node, n_features: int) -> Node:
         """
@@ -62,7 +71,7 @@ class AdaptiveMutationManager:
 
         if node.op is None and not node.is_variable():  # Only adjust constants
             creep_value = random.uniform(-0.1, 0.1)  # Small adjustment
-            node.value += creep_value
+            node.value = ('const', node.value[1] + creep_value)
 
         return mutant
 
@@ -88,16 +97,34 @@ class AdaptiveMutationManager:
 
     def choose_strategy(self):
         """
-        Choose the active mutation strategy based on statistics.
+        Choose the active mutation strategy based on statistics and log the reason for changes.
         """
+        new_strategy = self.active_strategy  # Default to current strategy
+
         if self.statistics.get("complexity", 0) > 10:
-            self.active_strategy = "shrink"
+            new_strategy = "shrink"
+            reason = "High complexity (>10)"
         elif self.statistics.get("diversity", 0) < 5:
-            self.active_strategy = "subtree"
+            new_strategy = "subtree"
+            reason = "Low diversity (<5)"
         elif self.statistics.get("stagnation", False):
-            self.active_strategy = "hoist"
+            new_strategy = "hoist"
+            reason = "Stagnation detected"
         else:
-            self.active_strategy = "simple"
+            new_strategy = "simple"
+            reason = "Default strategy"
+
+        # Log if strategy changes
+        if new_strategy != self.active_strategy:
+            self.previous_strategy = self.active_strategy
+            self.active_strategy = new_strategy
+            if self.logger:
+                self.logger.info(
+                    [
+                        f"Mutation strategy changed from {self.previous_strategy} to {self.active_strategy}",
+                        f"Reason: {reason}"
+                    ]  # Passa una lista di messaggi concatenabili
+                )
 
     def mutate(self, individual: Node, n_features: int) -> Node:
         """

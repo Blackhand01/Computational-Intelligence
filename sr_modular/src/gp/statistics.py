@@ -1,11 +1,20 @@
 import numpy as np
+import csv
 from evaluator import Evaluator
+from plotting import Plotter  # Importa il modulo Plotter
 
 class GPStatistics:
     def __init__(self):
         """
         Inizializza le metriche.
         """
+        self.history = {
+            "generation": [],
+            "best_fitness": [],
+            "average_fitness": [],
+            "diversity": [],
+            "complexity": [],
+        }
         self.best_fitness = float('inf')
         self.generations_no_improvement = 0
         self.complexity = 0.0
@@ -47,11 +56,24 @@ class GPStatistics:
         # Diversity
         self.diversity = self.calculate_diversity(population, x, y, bloat_penalty)
 
+        # Fitness media
+        fitness_values = [
+            Evaluator.fitness_function(ind, x, y, bloat_penalty) for ind in population
+        ]
+        avg_fitness = np.mean(fitness_values)
+
         # Aggiorna l'uso delle strategie
         for strategy_type, strategy_name in active_strategies.items():
             if strategy_name not in self.strategy_usage[strategy_type]:
                 self.strategy_usage[strategy_type][strategy_name] = 0
             self.strategy_usage[strategy_type][strategy_name] += 1
+
+        # Salva i dati storici
+        self.history["generation"].append(self.current_generation)
+        self.history["best_fitness"].append(best_fitness_current)
+        self.history["average_fitness"].append(avg_fitness)
+        self.history["diversity"].append(self.diversity)
+        self.history["complexity"].append(self.complexity)
 
     def calculate_diversity(self, population, x, y, bloat_penalty) -> float:
         """
@@ -72,21 +94,37 @@ class GPStatistics:
             for ind in population
         ]
 
-        # Rimuovi valori non validi (NaN, inf)
         fits = np.array(fits)
         fits = fits[np.isfinite(fits)]
 
         if len(fits) == 0:
-            return 0.0  # Nessuna diversità se non ci sono valori validi
+            return 0.0
 
-        # Normalizza i valori di fitness tra 0 e 1
-        # Bassa diversità (vicina a 0)
-        # Alta diversità (vicina a 1)
-        # Valori intermedi (tra 0.3 e 0.7, ad esempio) indicano un equilibrio tra esplorazione e sfruttamento
         fits_normalized = (fits - np.min(fits)) / (np.ptp(fits) + 1e-10)
-
-        # Calcola la deviazione standard
         return float(np.std(fits_normalized))
+
+    def export_history_to_csv(self, file_path):
+        """
+        Esporta i dati storici in un file CSV.
+
+        Args:
+            file_path (str): Percorso del file CSV di output.
+        """
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=self.history.keys())
+            writer.writeheader()
+            rows = zip(*self.history.values())
+            writer.writerows([dict(zip(self.history.keys(), row)) for row in rows])
+
+    def generate_plots(self, output_dir="./output/plots"):
+        """
+        Genera e salva i grafici a partire dai dati storici.
+
+        Args:
+            output_dir (str): Directory in cui salvare i grafici.
+        """
+        plotter = Plotter(self.history)
+        plotter.save_plots(directory=output_dir)
 
     def get_stats_dict(self):
         """
@@ -106,9 +144,12 @@ class GPStatistics:
         """
         return self.strategy_usage
 
-    def generate_summary(self):
+    def generate_summary(self, output_dir="./output/plots"):
         """
-        Genera un riepilogo leggibile delle statistiche.
+        Genera un riepilogo leggibile delle statistiche e salva i grafici.
+
+        Args:
+            output_dir (str): Directory in cui salvare i grafici.
         """
         summary = [
             f"Generazioni totali: {self.current_generation}",
@@ -123,5 +164,9 @@ class GPStatistics:
             summary.append(f"  {strategy_type.capitalize()}:")
             for strategy, count in usage.items():
                 summary.append(f"    {strategy}: {count} volte")
+
+        # Genera e salva i grafici
+        self.generate_plots(output_dir=output_dir)
+        summary.append(f"\nGrafici salvati in: {output_dir}")
 
         return "\n".join(summary)

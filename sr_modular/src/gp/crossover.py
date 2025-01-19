@@ -2,9 +2,18 @@ import random
 from tree import Node
 
 class AdaptiveCrossoverManager:
-    def __init__(self, statistics):
+    def __init__(self, statistics, logger=None):
+        """
+        Adaptive crossover manager for genetic programming.
+
+        Args:
+            statistics (dict): Dictionary containing statistics for decision-making.
+            logger (Logger, optional): Logger for recording strategy changes.
+        """
         self.statistics = statistics
+        self.logger = logger
         self.active_strategy = "one_point"  # Default strategy
+        self.previous_strategy = None  # To track changes in strategy
 
     def subtree_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
@@ -79,17 +88,30 @@ class AdaptiveCrossoverManager:
 
     def choose_strategy(self):
         """
-        Choose the active crossover strategy based on statistics.
+        Choose the active crossover strategy based on statistics and log the reason for changes.
         """
-        if self.statistics.get("complexity", 0) > 10:
-            self.active_strategy = "blended"
-        elif self.statistics.get("diversity", 0) < 5:
-            self.active_strategy = "uniform"
-        elif self.statistics.get("stagnation", False):
-            self.active_strategy = "subtree"
-        else:
-            self.active_strategy = "one_point"
+        new_strategy = self.active_strategy  # Default to current strategy
+        reason = "Default strategy (one_point)"
 
+        if self.statistics.get("complexity", 0) > 10:
+            new_strategy = "blended"
+            reason = "High complexity (>10)"
+        elif self.statistics.get("diversity", 0) < 5:
+            new_strategy = "uniform"
+            reason = "Low diversity (<5)"
+        elif self.statistics.get("stagnation", False):
+            new_strategy = "subtree"
+            reason = "Stagnation detected"
+
+        # Log if the strategy changes
+        if new_strategy != self.active_strategy:
+            self.previous_strategy = self.active_strategy
+            self.active_strategy = new_strategy
+            if self.logger:
+                self.logger.info(
+                    [f"Crossover strategy changed from {self.previous_strategy} to {self.active_strategy}", f"Reason: {reason}"]
+                )
+                
     def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
         """
         Apply the selected crossover strategy to the parents.
