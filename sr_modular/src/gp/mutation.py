@@ -1,7 +1,6 @@
 import random
 from tree import Node, random_variable, random_constant
 from safe_math import ALL_OPERATORS
-from gp.utils import get_random_node
 
 class AdaptiveMutationManager:
     def __init__(self, statistics):
@@ -13,7 +12,7 @@ class AdaptiveMutationManager:
         Simple mutation strategy that preserves the arity of the operator.
         """
         mutant = individual.copy_tree()
-        node, _ = get_random_node(mutant)
+        node, _ = Node.get_random_node(mutant)
 
         if node.op is None:  # Leaf node
             if node.is_variable():
@@ -32,7 +31,7 @@ class AdaptiveMutationManager:
         Replaces a randomly chosen subtree with a new randomly generated tree.
         """
         mutant = individual.copy_tree()
-        node, _ = get_random_node(mutant)
+        node, _ = Node.get_random_node(mutant)
 
         # Replace subtree
         new_subtree = Node.generate_random_tree(max_depth=3, n_features=n_features, grow=True)
@@ -45,7 +44,7 @@ class AdaptiveMutationManager:
         Replaces the root of a subtree with one of its children.
         """
         mutant = individual.copy_tree()
-        node, _ = get_random_node(mutant)
+        node, _ = Node.get_random_node(mutant)
 
         if not node.is_leaf():
             # Randomly select one of the children to hoist
@@ -59,7 +58,7 @@ class AdaptiveMutationManager:
         Slightly adjusts constants within the tree by adding a small random value.
         """
         mutant = individual.copy_tree()
-        node, _ = get_random_node(mutant)
+        node, _ = Node.get_random_node(mutant)
 
         if node.op is None and not node.is_variable():  # Only adjust constants
             creep_value = random.uniform(-0.1, 0.1)  # Small adjustment
@@ -72,7 +71,7 @@ class AdaptiveMutationManager:
         Replaces a subtree with a leaf node.
         """
         mutant = individual.copy_tree()
-        node, _ = get_random_node(mutant)
+        node, _ = Node.get_random_node(mutant)
 
         if node.op is not None:  # Only apply to non-leaf nodes
             node.op = None

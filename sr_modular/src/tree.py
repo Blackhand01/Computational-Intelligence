@@ -152,6 +152,16 @@ class Node:
 
         traverse(node, None)
         return random.choice(all_nodes)
+    
+    def replace_with(self, new_node):
+        """
+        Sostituisce il contenuto del nodo corrente con il contenuto di un altro nodo.
+        Args:
+            new_node (Node): Il nodo che sostituirà il nodo corrente.
+        """
+        self.op = new_node.op
+        self.value = new_node.value
+        self.children = [child.copy_tree() for child in new_node.children]
 
 # Funzioni di supporto
 

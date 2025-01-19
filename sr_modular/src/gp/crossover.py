@@ -1,6 +1,5 @@
 import random
 from tree import Node
-from gp.utils import get_random_node
 
 class AdaptiveCrossoverManager:
     def __init__(self, statistics):
@@ -15,8 +14,8 @@ class AdaptiveCrossoverManager:
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
 
-        node1, _ = get_random_node(child1)
-        node2, _ = get_random_node(child2)
+        node1, _ = Node.get_random_node(child1)
+        node2, _ = Node.get_random_node(child2)
 
         # Swap operations and children
         node1.op, node2.op = node2.op, node1.op
@@ -33,8 +32,8 @@ class AdaptiveCrossoverManager:
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
 
-        node1, _ = get_random_node(child1)
-        node2, _ = get_random_node(child2)
+        node1, _ = Node.get_random_node(child1)
+        node2, _ = Node.get_random_node(child2)
 
         # Swap only the first child if both nodes have children
         if len(node1.children) >= 1 and len(node2.children) >= 1:
