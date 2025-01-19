@@ -1,24 +1,17 @@
 import random
-from abc import ABC, abstractmethod
 from tree import Node, random_variable, random_constant
 from safe_math import ALL_OPERATORS
 from gp.utils import get_random_node
 
-class BaseMutationStrategy(ABC):
-    """
-    Abstract base class for mutation strategies.
-    """
+class AdaptiveMutationManager:
+    def __init__(self, statistics):
+        self.statistics = statistics
+        self.active_strategy = "simple"  # Default strategy
 
-    @abstractmethod
-    def mutate(self, individual: Node, n_features: int) -> Node:
-        pass
-
-class SimpleMutation(BaseMutationStrategy):
-    """
-    Simple mutation strategy that preserves the arity of the operator.
-    """
-
-    def mutate(self, individual: Node, n_features: int) -> Node:
+    def simple_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Simple mutation strategy that preserves the arity of the operator.
+        """
         mutant = individual.copy_tree()
         node, _ = get_random_node(mutant)
 
@@ -34,27 +27,23 @@ class SimpleMutation(BaseMutationStrategy):
 
         return mutant
 
-class SubtreeMutation(BaseMutationStrategy):
-    """
-    Replaces a randomly chosen subtree with a new randomly generated tree.
-    """
-
-    def mutate(self, individual: Node, n_features: int) -> Node:
+    def subtree_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Replaces a randomly chosen subtree with a new randomly generated tree.
+        """
         mutant = individual.copy_tree()
         node, _ = get_random_node(mutant)
 
         # Replace subtree
-        new_subtree = Node.generate_random_tree(depth=3, n_features=n_features, grow=True)
+        new_subtree = Node.generate_random_tree(max_depth=3, n_features=n_features, grow=True)
         node.replace_with(new_subtree)
 
         return mutant
 
-class HoistMutation(BaseMutationStrategy):
-    """
-    Replaces the root of a subtree with one of its children.
-    """
-
-    def mutate(self, individual: Node, n_features: int) -> Node:
+    def hoist_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Replaces the root of a subtree with one of its children.
+        """
         mutant = individual.copy_tree()
         node, _ = get_random_node(mutant)
 
@@ -65,12 +54,10 @@ class HoistMutation(BaseMutationStrategy):
 
         return mutant
 
-class CreepMutation(BaseMutationStrategy):
-    """
-    Slightly adjusts constants within the tree by adding a small random value.
-    """
-
-    def mutate(self, individual: Node, n_features: int) -> Node:
+    def creep_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Slightly adjusts constants within the tree by adding a small random value.
+        """
         mutant = individual.copy_tree()
         node, _ = get_random_node(mutant)
 
@@ -80,12 +67,10 @@ class CreepMutation(BaseMutationStrategy):
 
         return mutant
 
-class ShrinkMutation(BaseMutationStrategy):
-    """
-    Replaces a subtree with a leaf node.
-    """
-
-    def mutate(self, individual: Node, n_features: int) -> Node:
+    def shrink_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Replaces a subtree with a leaf node.
+        """
         mutant = individual.copy_tree()
         node, _ = get_random_node(mutant)
 
@@ -96,30 +81,16 @@ class ShrinkMutation(BaseMutationStrategy):
 
         return mutant
 
-class NoopMutation(BaseMutationStrategy):
-    """
-    Does nothing (useful for testing).
-    """
-
-    def mutate(self, individual: Node, n_features: int) -> Node:
+    def noop_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Does nothing (useful for testing).
+        """
         return individual.copy_tree()
 
-################################
-# Manager adattivo
-################################
-class AdaptiveMutationManager:
-    def __init__(self, statistics):
-        self.strategies = {
-            "simple": SimpleMutation(),
-            "subtree": SubtreeMutation(),
-            "hoist": HoistMutation(),
-            "shrink": ShrinkMutation(),
-            "noop": NoopMutation()
-        }
-        self.statistics = statistics
-        self.active_strategy = "simple"  # Default strategy
-
-    def choose_strategy(self) -> BaseMutationStrategy:
+    def choose_strategy(self):
+        """
+        Choose the active mutation strategy based on statistics.
+        """
         if self.statistics.get("complexity", 0) > 10:
             self.active_strategy = "shrink"
         elif self.statistics.get("diversity", 0) < 5:
@@ -129,12 +100,23 @@ class AdaptiveMutationManager:
         else:
             self.active_strategy = "simple"
 
-        return self.strategies[self.active_strategy]
-
     def mutate(self, individual: Node, n_features: int) -> Node:
-        chosen_strategy = self.choose_strategy()
-        return chosen_strategy.mutate(individual, n_features)
+        """
+        Apply the selected mutation strategy to the individual.
+        """
+        self.choose_strategy()
+        strategies = {
+            "simple": self.simple_mutation,
+            "subtree": self.subtree_mutation,
+            "hoist": self.hoist_mutation,
+            "creep": self.creep_mutation,
+            "shrink": self.shrink_mutation,
+            "noop": self.noop_mutation
+        }
+        return strategies[self.active_strategy](individual, n_features)
 
     def get_active_strategy(self) -> str:
-        """Restituisce la strategia attiva."""
+        """
+        Return the currently active strategy.
+        """
         return self.active_strategy

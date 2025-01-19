@@ -1,22 +1,17 @@
 import random
-from abc import ABC, abstractmethod
 from tree import Node
 from gp.utils import get_random_node
 
-class BaseCrossoverStrategy(ABC):
-    """
-    Abstract base class for crossover strategies.
-    """
-    @abstractmethod
-    def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
-        pass
+class AdaptiveCrossoverManager:
+    def __init__(self, statistics):
+        self.statistics = statistics
+        self.active_strategy = "one_point"  # Default strategy
 
-class SubtreeCrossoverStrategy(BaseCrossoverStrategy):
-    """
-    Subtree crossover strategy:
-    - Selects a random node in parent1 and parent2, swaps the subtrees.
-    """
-    def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+    def subtree_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+        """
+        Subtree crossover strategy:
+        - Selects a random node in parent1 and parent2, swaps the subtrees.
+        """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
 
@@ -30,12 +25,11 @@ class SubtreeCrossoverStrategy(BaseCrossoverStrategy):
 
         return child1, child2
 
-class OnePointCrossoverStrategy(BaseCrossoverStrategy):
-    """
-    One-point crossover strategy:
-    - Swaps a single child node between parent1 and parent2.
-    """
-    def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+    def one_point_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+        """
+        One-point crossover strategy:
+        - Swaps a single child node between parent1 and parent2.
+        """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
 
@@ -48,12 +42,11 @@ class OnePointCrossoverStrategy(BaseCrossoverStrategy):
 
         return child1, child2
 
-class UniformCrossoverStrategy(BaseCrossoverStrategy):
-    """
-    Uniform crossover strategy:
-    - Randomly selects genes from both parents for the offspring.
-    """
-    def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+    def uniform_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+        """
+        Uniform crossover strategy:
+        - Randomly selects genes from both parents for the offspring.
+        """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
 
@@ -64,12 +57,11 @@ class UniformCrossoverStrategy(BaseCrossoverStrategy):
 
         return child1, child2
 
-class BlendedCrossoverStrategy(BaseCrossoverStrategy):
-    """
-    Blended crossover strategy:
-    - Combines numerical values from parents to create offspring.
-    """
-    def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+    def blended_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+        """
+        Blended crossover strategy:
+        - Combines numerical values from parents to create offspring.
+        """
         child1 = parent1.copy_tree()
         child2 = parent2.copy_tree()
 
@@ -80,26 +72,16 @@ class BlendedCrossoverStrategy(BaseCrossoverStrategy):
 
         return child1, child2
 
-class NoopCrossoverStrategy(BaseCrossoverStrategy):
-    """
-    No-operation crossover strategy (useful for testing).
-    """
-    def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+    def noop_crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
+        """
+        No-operation crossover strategy (useful for testing).
+        """
         return parent1.copy_tree(), parent2.copy_tree()
 
-class AdaptiveCrossoverManager:
-    def __init__(self, statistics):
-        self.strategies = {
-            "subtree": SubtreeCrossoverStrategy(),
-            "one_point": OnePointCrossoverStrategy(),
-            "uniform": UniformCrossoverStrategy(),
-            "blended": BlendedCrossoverStrategy(),
-            "noop": NoopCrossoverStrategy()
-        }
-        self.statistics = statistics
-        self.active_strategy = "one_point"  # Default strategy
-
-    def choose_strategy(self) -> BaseCrossoverStrategy:
+    def choose_strategy(self):
+        """
+        Choose the active crossover strategy based on statistics.
+        """
         if self.statistics.get("complexity", 0) > 10:
             self.active_strategy = "blended"
         elif self.statistics.get("diversity", 0) < 5:
@@ -109,12 +91,22 @@ class AdaptiveCrossoverManager:
         else:
             self.active_strategy = "one_point"
 
-        return self.strategies[self.active_strategy]
-
     def crossover(self, parent1: Node, parent2: Node) -> tuple[Node, Node]:
-        chosen_strategy = self.choose_strategy()
-        return chosen_strategy.crossover(parent1, parent2)
+        """
+        Apply the selected crossover strategy to the parents.
+        """
+        self.choose_strategy()
+        strategies = {
+            "subtree": self.subtree_crossover,
+            "one_point": self.one_point_crossover,
+            "uniform": self.uniform_crossover,
+            "blended": self.blended_crossover,
+            "noop": self.noop_crossover
+        }
+        return strategies[self.active_strategy](parent1, parent2)
 
     def get_active_strategy(self) -> str:
-        """Restituisce la strategia attiva."""
+        """
+        Return the currently active strategy.
+        """
         return self.active_strategy
