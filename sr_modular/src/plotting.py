@@ -1,3 +1,4 @@
+from datetime import datetime
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -12,9 +13,11 @@ class Plotter:
             plot_dir_prefix (str): Prefisso per distinguere i grafici di un problema specifico.
             history (dict): Dizionario contenente i dati storici raccolti da GPStatistics.
         """
-        self.plot_dir = os.path.join(plot_dir, plot_dir_prefix)
+        self.plot_dir = plot_dir
+        self.plot_dir_prefix = plot_dir_prefix  # Aggiunto per evitare l'errore
         os.makedirs(self.plot_dir, exist_ok=True)
         self.history = history
+
 
     def save_plot(self, fig, filename):
         """
@@ -24,9 +27,13 @@ class Plotter:
             fig (Figure): Oggetto figura di Matplotlib.
             filename (str): Nome del file per il grafico.
         """
-        filepath = os.path.join(self.plot_dir, filename)
+        # Aggiungi il prefisso specifico
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        prefixed_filename = f"p_{self.plot_dir_prefix}_{timestamp}_{filename}"
+        filepath = os.path.join(self.plot_dir, prefixed_filename)
         fig.savefig(filepath, bbox_inches='tight')
         plt.close(fig)
+
 
     def plot_best_fitness(self):
         """
