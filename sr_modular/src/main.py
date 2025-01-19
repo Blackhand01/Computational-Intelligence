@@ -6,7 +6,7 @@ from core.statistics import GPStatistics
 def main():
     data_dir = './data/raw'
     output_file = './src/s333971.py'
-    base_output_dir = './output/'
+    base_output_dir = './experiments/'
     data_files = sorted(Path(data_dir).glob('*.npz'))
 
     if not data_files:

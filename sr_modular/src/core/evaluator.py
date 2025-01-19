@@ -7,11 +7,18 @@ class Evaluator:
     degli alberi generati dalla programmazione genetica (GP).
     """
 
-    
     @staticmethod
     def check_validity(array: np.ndarray) -> bool:
-        """Check if an array contains NaN, infinity, or values outside the allowed range."""
-        return not np.any(np.isnan(array)) and np.all(np.isfinite(array))
+        """
+        Check if an array contains NaN, infinity, or values outside the allowed range.
+
+        Args:
+            array (np.ndarray): Array di valori da verificare.
+
+        Returns:
+            bool: True se l'array è valido, False altrimenti.
+        """
+        return not np.any(np.isnan(array) | np.isinf(array) | (array < -1e6) | (array > 1e6))
 
     @staticmethod
     def calculate_mse(tree, x, y):
@@ -26,11 +33,14 @@ class Evaluator:
         Returns:
             float: Il valore dell'MSE.
         """
-        y_pred = Node.evaluate_tree(tree, x)
-        # if not Evaluator.check_validity(y_pred):
-        #     raise ValueError("La formula ha generato NaN o numeri non validi.")
-        return np.mean((y - y_pred) ** 2)
-    
+        try:
+            y_pred = Node.evaluate_tree(tree, x)
+            if not Evaluator.check_validity(y_pred):
+                return float('inf')  # Penalizza formule che generano output non validi
+            return np.mean((y - y_pred) ** 2)
+        except Exception as e:
+            return float('inf')  # Penalizza formule che generano errori
+
     @staticmethod
     def fitness_function(tree, x, y, bloat_penalty):
         """
@@ -47,7 +57,11 @@ class Evaluator:
         """
         mse = Evaluator.calculate_mse(tree, x, y)
         size = Node.tree_size(tree)
-        return mse + bloat_penalty * size
+
+        # Penalità per alberi molto grandi
+        penalty = bloat_penalty * (size ** 1.5)
+
+        return mse + penalty
 
     @staticmethod
     def evaluate_population(population, x, y, bloat_penalty):
@@ -63,7 +77,11 @@ class Evaluator:
         Returns:
             list[float]: Lista dei valori di fitness per ogni albero.
         """
-        return [Evaluator.fitness_function(tree, x, y, bloat_penalty) for tree in population]
+        fitness_values = []
+        for tree in population:
+            fitness = Evaluator.fitness_function(tree, x, y, bloat_penalty)
+            fitness_values.append(fitness)
+        return fitness_values
 
     @staticmethod
     def get_best_individual(population, x, y, bloat_penalty):
@@ -77,7 +95,7 @@ class Evaluator:
             bloat_penalty (float): Penalità applicata in base alla dimensione degli alberi.
 
         Returns:
-            Node: L'albero con la miglior fitness.
+            tuple: Il miglior albero e il valore della sua fitness.
         """
         fitness_values = Evaluator.evaluate_population(population, x, y, bloat_penalty)
         best_index = np.argmin(fitness_values)
