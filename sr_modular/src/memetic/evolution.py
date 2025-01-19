@@ -1,15 +1,15 @@
 import random
 import numpy as np
-from tree import Node
-from gp.mutation import AdaptiveMutationManager
-from gp.crossover import AdaptiveCrossoverManager
-from gp.selection import AdaptiveSelectionManager
-from gp.local_search import LocalSearchManager
+from core.tree import Node
+from memetic.mutation import AdaptiveMutationManager
+from memetic.crossover import AdaptiveCrossoverManager
+from memetic.selection import AdaptiveSelectionManager
+from memetic.local_search import LocalSearchManager
 from gp_config import (
     MAX_DEPTH, ELITISM, POP_SIZE, PARTIAL_REINIT_EVERY, PARTIAL_REINIT_RATIO,
     CROSSOVER_RATE, MUTATION_RATE, ENABLE_LOCAL_SEARCH
 )
-from evaluator import Evaluator
+from core.evaluator import Evaluator
 
 
 class GeneticProgramming:

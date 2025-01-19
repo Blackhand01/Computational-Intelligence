@@ -1,5 +1,5 @@
 import numpy as np
-from tree import Node
+from core.tree import Node
 
 class Evaluator:
     """

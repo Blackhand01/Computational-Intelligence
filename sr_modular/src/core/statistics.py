@@ -1,7 +1,7 @@
 import numpy as np
 import csv
-from evaluator import Evaluator
-from plotting import Plotter
+from core.evaluator import Evaluator
+from utility.plotting import Plotter
 
 
 class GPStatistics:

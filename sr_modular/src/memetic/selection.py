@@ -1,7 +1,7 @@
 import random
 import numpy as np
-from tree import Node
-from evaluator import Evaluator
+from core.tree import Node
+from core.evaluator import Evaluator
 
 
 class AdaptiveSelectionManager:

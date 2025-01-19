@@ -1,8 +1,8 @@
 import random
 import numpy as np
-from tree import Node
-from evaluator import Evaluator
-from safe_math import ALL_OPERATORS
+from core.tree import Node
+from core.evaluator import Evaluator
+from core.safe_math import ALL_OPERATORS
 
 
 class LocalSearchManager:

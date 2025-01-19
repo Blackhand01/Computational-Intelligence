@@ -1,6 +1,6 @@
 import random
-from tree import Node, random_variable, random_constant
-from safe_math import ALL_OPERATORS
+from core.tree import Node, random_variable, random_constant
+from core.safe_math import ALL_OPERATORS
 
 
 class AdaptiveMutationManager:

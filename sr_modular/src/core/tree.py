@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from safe_math import ALL_OPERATORS
+from core.safe_math import ALL_OPERATORS
 
 class Node:
     """

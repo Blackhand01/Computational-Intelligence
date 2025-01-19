@@ -1,5 +1,5 @@
 import random
-from tree import Node
+from core.tree import Node
 
 class AdaptiveCrossoverManager:
     """

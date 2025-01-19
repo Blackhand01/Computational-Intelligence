@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-from utils import initialize_experiment, load_data, run_genetic_programming, save_results
-from gp.statistics import GPStatistics
+from utility.utils import initialize_experiment, load_data, run_genetic_programming, save_results
+from core.statistics import GPStatistics
 
 def main():
     data_dir = './data/raw'

@@ -5,12 +5,12 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from evaluator import Evaluator
-from gp.evolution import GeneticProgramming
-from gp.statistics import GPStatistics
+from core.evaluator import Evaluator
+from memetic.evolution import GeneticProgramming
+from core.statistics import GPStatistics
 from gp_config import BLOAT_PENALTY, N_GENERATIONS
-from logger import Logger
-from plotting import Plotter
+from utility.logger import Logger
+from utility.plotting import Plotter
 
 
 def update_formula_in_file(formula_str, file_path, function_name):
