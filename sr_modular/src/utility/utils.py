@@ -2,43 +2,16 @@
 # Funzione per salvare la formula migliore in un file
 # ==============================================
 from pathlib import Path
+import random
 import numpy as np
 from tqdm import tqdm
 
 from core.evaluator import Evaluator
 from memetic.evolution import GeneticProgramming
 from core.statistics import GPStatistics
-from gp_config import BLOAT_PENALTY, N_GENERATIONS
+from gp_config import BLOAT_PENALTY, N_GENERATIONS, SEED
 from utility.logger import Logger
 from utility.plotting import Plotter
-
-
-def update_formula_in_file(formula_str, file_path, function_name):
-    """
-    Sovrascrive completamente la funzione `function_name` in `file_path`
-    con `return formula_str`, assicurandosi che sia nel formato NumPy corretto.
-    """
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-
-    new_lines = []
-    inside_function = False
-    for line in lines:
-        if line.strip().startswith(f"def {function_name}"):
-            inside_function = True
-            new_lines.append(f"def {function_name}(x: np.ndarray) -> np.ndarray:\n")
-            new_lines.append(f"    return {formula_str}\n")
-            continue
-        if inside_function:
-            if line.strip() == "" or line.strip().startswith("def "):
-                inside_function = False
-        if not inside_function:
-            new_lines.append(line)
-
-    with open(file_path, 'w') as file:
-        file.writelines(new_lines)
-
-    print(f"Formula aggiornata in {file_path} nella funzione {function_name}.")
 
 
 def initialize_experiment(data_file, base_output_dir):
@@ -52,6 +25,8 @@ def initialize_experiment(data_file, base_output_dir):
     Returns:
         dict: Contiene le configurazioni iniziali dell'esperimento.
     """
+    random.seed(SEED)
+    np.random.seed(SEED)
     # Estrae l'ID del problema dall'ultimo elemento del nome del file
     problem_id = data_file.stem.split('_')[-1]
     problem_dir = Path(base_output_dir) / f"problem_{problem_id}"
@@ -144,3 +119,31 @@ def save_results(best_individual, stats, output_file, function_name, plot_dir):
     # Crea e salva tutti i grafici tramite il Plotter
     plotter = Plotter(plot_dir=str(plot_dir), plot_dir_prefix=function_name, history=stats.history)
     plotter.save_all_plots(strategy_usage=stats.strategy_usage)
+
+def update_formula_in_file(formula_str, file_path, function_name):
+    """
+    Sovrascrive completamente la funzione `function_name` in `file_path`
+    con `return formula_str`, assicurandosi che sia nel formato NumPy corretto.
+    """
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    new_lines = []
+    inside_function = False
+    for line in lines:
+        if line.strip().startswith(f"def {function_name}"):
+            inside_function = True
+            new_lines.append(f"def {function_name}(x: np.ndarray) -> np.ndarray:\n")
+            new_lines.append(f"    return {formula_str}\n")
+            continue
+        if inside_function:
+            if line.strip() == "" or line.strip().startswith("def "):
+                inside_function = False
+        if not inside_function:
+            new_lines.append(line)
+
+    with open(file_path, 'w') as file:
+        file.writelines(new_lines)
+
+    print(f"Formula aggiornata in {file_path} nella funzione {function_name}.")
+

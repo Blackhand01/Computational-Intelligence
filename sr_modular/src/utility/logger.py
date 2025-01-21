@@ -9,7 +9,8 @@ class Logger:
         os.makedirs(log_dir, exist_ok=True)
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.log_file = os.path.join(log_dir, f"{log_file_prefix}_{self.timestamp}_log.csv")
-        
+        self.general_log_file = os.path.join("./docs", f"general_log_{self.timestamp}.txt")  # Log generale
+
         # Header per la tabella delle metriche (Metrics)
         self.metrics_fields = [
             "timestamp",
@@ -32,11 +33,14 @@ class Logger:
         self.metrics_logs = []
         self.messages_logs = []
 
-        # Configure console logging
+        # Configura il logging per console e file generale
         logging.basicConfig(
             format="%(asctime)s - %(message)s",
             level=logging.INFO,
-            handlers=[logging.StreamHandler()]
+            handlers=[
+                logging.StreamHandler(),  # Per output sulla console
+                logging.FileHandler(self.general_log_file, mode='a')  # Per output su file generale
+            ]
         )
         self.logger = logging.getLogger("GPLogger")
 
@@ -80,7 +84,7 @@ class Logger:
         """
         if isinstance(message, list):
             message = " | ".join(message)
-        # Log sulla console
+        # Log sulla console e nel file generale
         self.logger.info(message)
         # Se vengono fornite metriche, logga una riga nella sezione delle metriche
         if any(v is not None for v in [generation, best_fitness, avg_fitness, diversity, complexity, strategies, local_search]):
@@ -100,9 +104,11 @@ class Logger:
     def generate_summary(self, stats, best_expression, total_time, start_time, end_time, reason, success=True):
         """Genera un riepilogo dettagliato dell'esperimento e aggiunge questa informazione alle liste interne."""
         strategy_usage = stats.get_strategy_usage()
-        diversity_category = self.interpret_metric(stats.diversity, [0.2, 0.5])
-        complexity_category = self.interpret_metric(stats.complexity, [10, 20])
-        fitness_category = "Good" if stats.best_fitness < 0.05 else "Discrete" if stats.best_fitness < 0.1 else "Bad"
+        diversity_category = self.interpret_metric(stats.diversity, [0.5, 2])
+        complexity_category = self.interpret_metric(stats.complexity, [5, 10])
+        fitness_category = "Best" if stats.best_fitness == 0 else "Good" if stats.best_fitness < 0.5 else "Discrete" if stats.best_fitness < 1 else "Bad"
+
+        stagnation_percentage = 0 if stats.current_generation == 0 else (stats.generations_no_improvement / stats.current_generation) * 100
 
         summary = (
             "\n==================== Experiment Summary ====================\n"
@@ -124,7 +130,7 @@ class Logger:
             f"Final Complexity: {stats.complexity:.4f} ({complexity_category})\n"
             f"Total Generations: {stats.current_generation}\n"
             f"Generations Without Improvement: {stats.generations_no_improvement} "
-            f"({(stats.generations_no_improvement / stats.current_generation) * 100:.1f}%)\n"
+            f"({stagnation_percentage:.1f}%)\n"
             f"Best Fitness Achieved: {stats.best_fitness:.4f} ({fitness_category})\n"
             f"Best Expression: {best_expression}\n\n"
             "--- Strategy Usage ---\n"
@@ -139,6 +145,8 @@ class Logger:
         
         # Flush: scrive l'intero contenuto (metriche e messaggi) in un unico file
         self.flush_logs()
+
+
 
     def flush_logs(self):
         """

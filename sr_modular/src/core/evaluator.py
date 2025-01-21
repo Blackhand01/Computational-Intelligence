@@ -57,11 +57,10 @@ class Evaluator:
         """
         mse = Evaluator.calculate_mse(tree, x, y)
         size = Node.tree_size(tree)
-
         # Penalità per alberi molto grandi
-        penalty = bloat_penalty * (size ** 1.5)
+        penalty = bloat_penalty * size 
 
-        return mse + penalty
+        return mse
 
     @staticmethod
     def evaluate_population(population, x, y, bloat_penalty):

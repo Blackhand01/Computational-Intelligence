@@ -7,7 +7,8 @@ from memetic.selection import AdaptiveSelectionManager
 from memetic.local_search import LocalSearchManager
 from gp_config import (
     MAX_DEPTH, ELITISM, POP_SIZE, PARTIAL_REINIT_EVERY, PARTIAL_REINIT_RATIO,
-    CROSSOVER_RATE, MUTATION_RATE, ENABLE_LOCAL_SEARCH
+    CROSSOVER_RATE, MUTATION_RATE, ENABLE_LOCAL_SEARCH, DIVERSITY_THRESHOLD, 
+    REINIT_FRACTION, MAX_GENERATIONS_NO_IMPROVEMENT, FITNESS_THRESHOLD
 )
 from core.evaluator import Evaluator
 
@@ -37,6 +38,16 @@ class GeneticProgramming:
             Node.generate_random_tree(MAX_DEPTH, self.n_features, grow=random.random() > 0.5)
             for _ in range(POP_SIZE)
         ]
+
+    def diversity_injection(self, population):
+        """
+        Inject diversity into the population by reinitializing a fraction of individuals.
+        """
+        num_to_reinitialize = int(REINIT_FRACTION * POP_SIZE)
+        for i in range(num_to_reinitialize):
+            population[-(i + 1)] = Node.generate_random_tree(MAX_DEPTH, self.n_features, grow=True)
+        self.stats.logger.info(f"Diversity injection: {num_to_reinitialize} individuals reinitialized.")
+        return population
 
     def evolve_population(self, population, generation):
         """
@@ -72,6 +83,10 @@ class GeneticProgramming:
             for i in range(int(PARTIAL_REINIT_RATIO * POP_SIZE)):
                 new_population[-(i + 1)] = Node.generate_random_tree(MAX_DEPTH, self.n_features, grow=True)
 
+        # Inject diversity if diversity falls below the threshold
+        if self.stats.diversity < DIVERSITY_THRESHOLD:
+            new_population = self.diversity_injection(new_population)
+
         # Apply local search if enabled
         if ENABLE_LOCAL_SEARCH:
             ls_fraction = 0.2
@@ -100,6 +115,19 @@ class GeneticProgramming:
             current_best, current_fitness = self.evaluator.get_best_individual(
                 population, self.x, self.y, self.bloat_penalty
             )
+
+            # Early stopping criteria
+            if (
+                current_fitness == 0 or self.stats.generations_no_improvement >= MAX_GENERATIONS_NO_IMPROVEMENT and
+                current_fitness <= FITNESS_THRESHOLD
+            ):
+                self.stats.best_fitness = current_fitness
+                self.stats.logger.info(
+                    f"Early stopping triggered at generation {gen+1}: "
+                    f"Best Fitness = {current_fitness:.4f}, "
+                    f"Generations Without Improvement = {self.stats.generations_no_improvement}"
+                )
+                break
 
             # Retrieve the strategies active before updating statistics.
             old_selection = self.selection_manager.get_active_strategy()

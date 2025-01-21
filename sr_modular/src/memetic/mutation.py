@@ -116,6 +116,33 @@ class AdaptiveMutationManager:
         Utile per testare altri aspetti del sistema.
         """
         return individual.copy_tree()
+    
+    def incremental_mutation(self, individual: Node, n_features: int) -> Node:
+        """
+        Modifica incrementale: aggiunge piccole variazioni multiple al singolo individuo.
+        """
+        mutant = individual.copy_tree()
+        for _ in range(random.randint(1, 3)):  # Effettua 1-3 piccole modifiche
+            node, _ = Node.get_random_node(mutant)
+            if node.op is None and not node.is_variable():  # Solo per costanti
+                node.value = ('const', node.value[1] + random.uniform(-0.05, 0.05))
+        return mutant
+    
+    def diversity_mutation(self, individual: Node, n_features: int) -> Node:
+        mutant = individual.copy_tree()
+        for _ in range(random.randint(2, 5)):  # Modifica 2-5 nodi casualmente
+            node, _ = Node.get_random_node(mutant)
+            if node.op is None:  # Nodo foglia
+                if node.is_variable():
+                    node.value = random_constant()
+                else:
+                    node.value = random_variable(n_features)
+            else:  # Nodo interno
+                current_arity = ALL_OPERATORS[node.op].arity
+                valid_ops = [op for op in ALL_OPERATORS.values() if op.arity == current_arity]
+                node.op = random.choice(valid_ops).name
+        return mutant
+
 
     def choose_strategy(self):
         """
@@ -125,24 +152,34 @@ class AdaptiveMutationManager:
         new_strategy = old_strategy  # Strategia predefinita
         reason = "Strategia predefinita (simple)"
 
-        if self.statistics.complexity > 10:
+        if self.statistics.generations_no_improvement > 3:
+            new_strategy = "diversity"
+            reason = "Stagnazione rilevata (nessun miglioramento per 7 generazioni)"
+        elif self.statistics.complexity > 12_000:
             new_strategy = "shrink"
-            reason = "Alta complessità (>10)"
-        elif self.statistics.diversity < 5:
-            new_strategy = "subtree"
-            reason = "Bassa diversità (<5)"
-        elif self.statistics.generations_no_improvement > 5:
-            new_strategy = "hoist"
-            reason = "Stagnazione rilevata"
+            reason = "Alta complessità (>12.000)"
+        elif self.statistics.diversity < 3:
+            new_strategy = "creep"
+            reason = "Bassa diversità (<3)"
+        elif self.statistics.generations_no_improvement > 4 and self.statistics.diversity > 5:
+            new_strategy = "incremental"
+            reason = "Stagnazione moderata con diversità sufficiente"
+        else:
+            new_strategy = "simple"
+            reason = "Condizioni generali stabili"
 
-        self.statistics.update_single_strategy(
-            strategy_type="mutation",
-            old_strategy=old_strategy,
-            new_strategy=new_strategy,
-            reason=reason
-        )
+        # Aggiorna la strategia se è cambiata
+        if old_strategy != new_strategy:
+            self.statistics.update_single_strategy(
+                strategy_type="mutation",
+                old_strategy=old_strategy,
+                new_strategy=new_strategy,
+                reason=reason
+            )
 
         self.active_strategy = new_strategy
+
+
 
     def mutate(self, individual: Node, n_features: int) -> Node:
         """
@@ -155,8 +192,10 @@ class AdaptiveMutationManager:
             "hoist": self.hoist_mutation,
             "creep": self.creep_mutation,
             "shrink": self.shrink_mutation,
-            "noop": self.noop_mutation
+            "noop": self.noop_mutation,
+            "diversity": self.diversity_mutation,
         }
+
         return strategies[self.active_strategy](individual, n_features)
 
     def get_active_strategy(self) -> str:

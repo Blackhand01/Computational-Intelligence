@@ -2,7 +2,6 @@ from datetime import datetime
 from pathlib import Path
 from utility.utils import initialize_experiment, load_data, run_genetic_programming, save_results
 from core.statistics import GPStatistics
-
 def main():
     data_dir = './data/raw'
     output_file = './src/s333971.py'
@@ -17,12 +16,12 @@ def main():
         experiment_successful = True
         start_time = datetime.now()
         reason = "Max generations reached"
-        
-        # Inizializzo stats a None
-        stats = None  
+
+        stats = None
         best_individual = None
 
         try:
+            # Inizializza l'esperimento
             experiment_config = initialize_experiment(data_file, base_output_dir)
             logger = experiment_config["logger"]
 
@@ -31,15 +30,15 @@ def main():
             # Carico i dati
             x, y = load_data(data_file)
 
-            # Eseguo GP: la funzione restituisce best_individual, stats
+            # Esegui GP e ottieni risultati
             best_individual, stats = run_genetic_programming(x, y, logger)
 
-            # Salvo i risultati
+            # Salva i risultati (formula, grafici, log)
             save_results(
                 best_individual=best_individual,
                 stats=stats,
                 output_file=output_file,
-                function_name=f"{experiment_config['problem_id']}",
+                function_name=f"f{experiment_config['problem_id']}",  # Nome funzione basato sull'ID del problema
                 plot_dir=experiment_config["plot_dir"],
             )
 
@@ -54,7 +53,7 @@ def main():
             end_time = datetime.now()
             total_time = (end_time - start_time).total_seconds()
 
-            # Se stats è None, evito di chiamare get_strategy_usage
+            # Genera un riepilogo, anche se ci sono stati errori
             if stats is not None:
                 logger.generate_summary(
                     stats=stats,
@@ -66,12 +65,10 @@ def main():
                     success=experiment_successful
                 )
             else:
-                # Loggo comunque un piccolo summary
-                logger.log_message(
-                    "No GPStatistics available. Possibly an error occurred before stats was set."
-                )
+                logger.log_message("No GPStatistics available. Possibly an error occurred.")
 
     print("All experiments completed.")
+
 
 if __name__ == "__main__":
     main()

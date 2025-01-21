@@ -103,16 +103,16 @@ class AdaptiveSelectionManager:
         old_strategy = self.active_strategy
         new_strategy = old_strategy  # Strategia predefinita
         reason = "Strategia predefinita (elitist)"
-
-        if self.statistics.complexity > 10:
-            new_strategy = "rank"
-            reason = "Alta complessità (>10)"
+        
+        if self.statistics.generations_no_improvement > 3:
+            new_strategy = "roulette"
+            reason = "Stagnazione rilevata"
         elif self.statistics.diversity < 5:
             new_strategy = "tournament"
             reason = "Bassa diversità (<5)"
-        elif self.statistics.generations_no_improvement > 5:
-            new_strategy = "roulette"
-            reason = "Stagnazione rilevata"
+        elif self.statistics.complexity > 10:
+            new_strategy = "rank"
+            reason = "Alta complessità (>10)"
 
         # Aggiorna la strategia tramite GPStatistics
         self.statistics.update_single_strategy(

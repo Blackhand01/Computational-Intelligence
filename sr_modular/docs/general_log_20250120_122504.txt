@@ -1,0 +1,877 @@
+2025-01-20 12:25:04,666 - Processing Problem 0
+2025-01-20 12:25:04,669 - Initializing Genetic Programming.
+2025-01-20 12:25:04,703 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,707 - Generation 1/100 - Best Fitness: 1.8911
+2025-01-20 12:25:04,719 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,723 - Generation 2/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,733 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,736 - Generation 3/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,746 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,748 - Generation 4/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,756 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,759 - Generation 5/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,812 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,815 - Generation 6/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,870 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,872 - Generation 7/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,915 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,917 - Generation 8/100 - Best Fitness: 0.0107
+2025-01-20 12:25:04,964 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:04,967 - Generation 9/100 - Best Fitness: 0.0107
+2025-01-20 12:25:05,032 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:05,035 - Generation 10/100 - Best Fitness: 0.0107
+2025-01-20 12:25:05,090 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:05,092 - Generation 11/100 - Best Fitness: 0.0107
+2025-01-20 12:25:05,136 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:05,138 - Generation 12/100 - Best Fitness: 0.0107
+2025-01-20 12:25:05,139 - Early stopping triggered at generation 13: Best Fitness = 0.0107, Generations Without Improvement = 10
+2025-01-20 12:25:05,553 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:04
+Experiment finished at 2025-01-20 12:25:05
+Duration: 0.90 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.1637 (Low)
+Final Complexity: 6.6200 (Medium)
+Total Generations: 12
+Generations Without Improvement: 10 (83.3%)
+Best Fitness Achieved: 0.0107 (Good)
+Best Expression: x[0]
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 6, 'roulette': 7}
+Crossover Strategies: {'one_point': 1, 'uniform': 6, 'subtree': 7}
+Mutation Strategies: {'simple': 1, 'creep': 6, 'diversity': 7}
+Local Search Algorithms: {'hill_climb': 1, 'best_subtree_replacement': 12}
+
+2025-01-20 12:25:05,553 - Processing Problem 1
+2025-01-20 12:25:05,554 - Initializing Genetic Programming.
+2025-01-20 12:25:05,557 - Early stopping triggered at generation 1: Best Fitness = 0.0000, Generations Without Improvement = 0
+2025-01-20 12:25:05,819 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:05
+Experiment finished at 2025-01-20 12:25:05
+Duration: 0.27 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.0000 (Low)
+Final Complexity: 0.0000 (Low)
+Total Generations: 0
+Generations Without Improvement: 0 (0.0%)
+Best Fitness Achieved: inf (Bad)
+Best Expression: np.sin(x[0])
+
+--- Strategy Usage ---
+Selection Strategies: {}
+Crossover Strategies: {}
+Mutation Strategies: {}
+Local Search Algorithms: {}
+
+2025-01-20 12:25:05,819 - Processing Problem 2
+2025-01-20 12:25:05,820 - Initializing Genetic Programming.
+2025-01-20 12:25:05,905 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:05,921 - Generation 1/100 - Best Fitness: 29616918167268.7617
+2025-01-20 12:25:05,963 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:05,981 - Generation 2/100 - Best Fitness: 29608510647056.5586
+2025-01-20 12:25:06,028 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,048 - Generation 3/100 - Best Fitness: 29608510647056.5586
+2025-01-20 12:25:06,095 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,114 - Generation 4/100 - Best Fitness: 29607586269294.8984
+2025-01-20 12:25:06,153 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,178 - Generation 5/100 - Best Fitness: 29607586269294.8984
+2025-01-20 12:25:06,237 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,259 - Generation 6/100 - Best Fitness: 29555303581533.3008
+2025-01-20 12:25:06,309 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,334 - Generation 7/100 - Best Fitness: 29554934706253.4023
+2025-01-20 12:25:06,380 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,414 - Generation 8/100 - Best Fitness: 29554502783665.2852
+2025-01-20 12:25:06,509 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,544 - Generation 9/100 - Best Fitness: 29554502783665.2852
+2025-01-20 12:25:06,621 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,652 - Generation 10/100 - Best Fitness: 29554502783665.2852
+2025-01-20 12:25:06,726 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,761 - Generation 11/100 - Best Fitness: 29537952680894.7148
+2025-01-20 12:25:06,841 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:06,877 - Generation 12/100 - Best Fitness: 29537952680894.7148
+2025-01-20 12:25:06,963 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,010 - Generation 13/100 - Best Fitness: 29537952680894.7148
+2025-01-20 12:25:07,128 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,187 - Generation 14/100 - Best Fitness: 29450476198715.0195
+2025-01-20 12:25:07,329 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,379 - Generation 15/100 - Best Fitness: 29450476198715.0195
+2025-01-20 12:25:07,500 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,545 - Generation 16/100 - Best Fitness: 29450476198715.0195
+2025-01-20 12:25:07,656 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,701 - Generation 17/100 - Best Fitness: 29450168298384.4336
+2025-01-20 12:25:07,797 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,841 - Generation 18/100 - Best Fitness: 29450168298384.4336
+2025-01-20 12:25:07,948 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:07,992 - Generation 19/100 - Best Fitness: 29449685129101.1602
+2025-01-20 12:25:08,087 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:08,127 - Generation 20/100 - Best Fitness: 29449554513268.3125
+2025-01-20 12:25:08,212 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:08,248 - Generation 21/100 - Best Fitness: 29449554513268.3125
+2025-01-20 12:25:08,318 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:08,360 - Generation 22/100 - Best Fitness: 29449554513268.3125
+2025-01-20 12:25:08,447 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:08,499 - Generation 23/100 - Best Fitness: 29449149670133.3633
+2025-01-20 12:25:08,620 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:08,668 - Generation 24/100 - Best Fitness: 29449149670133.3633
+2025-01-20 12:25:08,777 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:08,829 - Generation 25/100 - Best Fitness: 29319786423614.3555
+2025-01-20 12:25:08,958 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:09,014 - Generation 26/100 - Best Fitness: 29319786423614.3555
+2025-01-20 12:25:09,156 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:09,213 - Generation 27/100 - Best Fitness: 28262283470535.4414
+2025-01-20 12:25:09,356 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:09,423 - Generation 28/100 - Best Fitness: 28262283470535.4414
+2025-01-20 12:25:09,585 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:09,647 - Generation 29/100 - Best Fitness: 28262074428110.0977
+2025-01-20 12:25:09,793 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:09,849 - Generation 30/100 - Best Fitness: 28244220324742.0781
+2025-01-20 12:25:09,986 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:10,041 - Generation 31/100 - Best Fitness: 28145268924569.4102
+2025-01-20 12:25:10,175 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:10,233 - Generation 32/100 - Best Fitness: 28145268924569.4102
+2025-01-20 12:25:10,393 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:10,451 - Generation 33/100 - Best Fitness: 28139652105631.4570
+2025-01-20 12:25:10,603 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:10,660 - Generation 34/100 - Best Fitness: 28139652105631.4570
+2025-01-20 12:25:10,806 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:10,862 - Generation 35/100 - Best Fitness: 28139652105631.4570
+2025-01-20 12:25:11,001 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:11,057 - Generation 36/100 - Best Fitness: 27532934995194.0859
+2025-01-20 12:25:11,203 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:11,260 - Generation 37/100 - Best Fitness: 27532934995194.0859
+2025-01-20 12:25:11,410 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:11,465 - Generation 38/100 - Best Fitness: 27532934995194.0859
+2025-01-20 12:25:11,610 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:11,674 - Generation 39/100 - Best Fitness: 27511268860075.2422
+2025-01-20 12:25:11,845 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:11,915 - Generation 40/100 - Best Fitness: 27511268860075.2422
+2025-01-20 12:25:12,086 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:12,143 - Generation 41/100 - Best Fitness: 27510769035143.5898
+2025-01-20 12:25:12,282 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:12,342 - Generation 42/100 - Best Fitness: 27504491207213.6914
+2025-01-20 12:25:12,487 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:12,552 - Generation 43/100 - Best Fitness: 27504491207213.6914
+2025-01-20 12:25:12,716 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:12,777 - Generation 44/100 - Best Fitness: 27504491207213.6914
+2025-01-20 12:25:12,933 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:12,997 - Generation 45/100 - Best Fitness: 27504128407269.3711
+2025-01-20 12:25:13,165 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:13,234 - Generation 46/100 - Best Fitness: 27504128407269.3711
+2025-01-20 12:25:13,418 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:13,482 - Generation 47/100 - Best Fitness: 27503939797902.4336
+2025-01-20 12:25:13,646 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:13,709 - Generation 48/100 - Best Fitness: 27503939797902.4336
+2025-01-20 12:25:13,867 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:13,926 - Generation 49/100 - Best Fitness: 27101376449495.0977
+2025-01-20 12:25:14,073 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:14,129 - Generation 50/100 - Best Fitness: 27101376449495.0977
+2025-01-20 12:25:14,277 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:14,337 - Generation 51/100 - Best Fitness: 27101024244795.7773
+2025-01-20 12:25:14,487 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:14,546 - Generation 52/100 - Best Fitness: 27100959352544.7852
+2025-01-20 12:25:14,701 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:14,762 - Generation 53/100 - Best Fitness: 27099370750762.1406
+2025-01-20 12:25:14,921 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:14,982 - Generation 54/100 - Best Fitness: 27099370750762.1406
+2025-01-20 12:25:15,139 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:15,201 - Generation 55/100 - Best Fitness: 27099370750762.1406
+2025-01-20 12:25:15,362 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:15,422 - Generation 56/100 - Best Fitness: 27099370750762.1406
+2025-01-20 12:25:15,562 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:15,621 - Generation 57/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:15,768 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:15,832 - Generation 58/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:15,988 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:16,052 - Generation 59/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:16,209 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:16,273 - Generation 60/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:17,493 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:17,545 - Generation 61/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:18,447 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:18,495 - Generation 62/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:19,367 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:19,413 - Generation 63/100 - Best Fitness: 27098942793560.4727
+2025-01-20 12:25:19,528 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:19,563 - Generation 64/100 - Best Fitness: 27098159356127.9180
+2025-01-20 12:25:19,640 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:19,680 - Generation 65/100 - Best Fitness: 27098157863092.7891
+2025-01-20 12:25:19,762 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:19,798 - Generation 66/100 - Best Fitness: 27098157863092.7891
+2025-01-20 12:25:19,874 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:19,913 - Generation 67/100 - Best Fitness: 27098157863092.7891
+2025-01-20 12:25:20,000 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:20,040 - Generation 68/100 - Best Fitness: 27098157863092.7891
+2025-01-20 12:25:20,674 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:20,711 - Generation 69/100 - Best Fitness: 27098157863092.7891
+2025-01-20 12:25:21,297 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:21,326 - Generation 70/100 - Best Fitness: 27098157863092.7891
+2025-01-20 12:25:21,383 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:21,412 - Generation 71/100 - Best Fitness: 27074265197480.1289
+2025-01-20 12:25:21,467 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:21,499 - Generation 72/100 - Best Fitness: 27074265197480.1289
+2025-01-20 12:25:21,565 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:21,603 - Generation 73/100 - Best Fitness: 27074265197480.1289
+2025-01-20 12:25:21,690 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:21,738 - Generation 74/100 - Best Fitness: 27074265197480.1289
+2025-01-20 12:25:21,850 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:21,900 - Generation 75/100 - Best Fitness: 27073926537722.2500
+2025-01-20 12:25:22,023 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:22,079 - Generation 76/100 - Best Fitness: 27073926537722.2500
+2025-01-20 12:25:22,223 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:22,278 - Generation 77/100 - Best Fitness: 27073926537722.2500
+2025-01-20 12:25:22,416 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:22,464 - Generation 78/100 - Best Fitness: 27073926537722.2500
+2025-01-20 12:25:22,584 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:22,629 - Generation 79/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:22,738 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:22,785 - Generation 80/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:22,898 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:22,951 - Generation 81/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:23,083 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:23,130 - Generation 82/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:23,947 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:23,983 - Generation 83/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:24,535 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:24,572 - Generation 84/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:25,133 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:25,166 - Generation 85/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:25,665 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:25,697 - Generation 86/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:26,233 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:26,265 - Generation 87/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:26,743 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:26,780 - Generation 88/100 - Best Fitness: 27073899609677.1602
+2025-01-20 12:25:26,866 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:26,904 - Generation 89/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:26,995 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:27,039 - Generation 90/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:27,135 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:27,179 - Generation 91/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:27,283 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:27,328 - Generation 92/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:28,070 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:28,106 - Generation 93/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:28,655 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:28,684 - Generation 94/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:29,110 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:29,131 - Generation 95/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:29,436 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:29,467 - Generation 96/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:29,933 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:29,959 - Generation 97/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:30,370 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:30,401 - Generation 98/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:30,872 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:30,900 - Generation 99/100 - Best Fitness: 27071389601086.4570
+2025-01-20 12:25:30,909 - Early stopping triggered at generation 100: Best Fitness = 27069341008910.2930, Generations Without Improvement = 10
+2025-01-20 12:25:31,213 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:05
+Experiment finished at 2025-01-20 12:25:31
+Duration: 25.39 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.2057 (Low)
+Final Complexity: 8.8400 (Medium)
+Total Generations: 99
+Generations Without Improvement: 10 (10.1%)
+Best Fitness Achieved: 27071389601086.4570 (Bad)
+Best Expression: np.add(np.multiply(np.maximum(np.maximum(x[0], np.sqrt(x[0])), x[1]), np.exp(np.add(np.power(np.exp(np.power(x[0], 0.6108324655365809)), x[2]), np.power(np.exp(np.maximum(x[0], x[2])), x[1])))), np.power(np.subtract(np.exp(np.negative(np.maximum(x[0], x[0]))), 0.8046258916688294), -0.5911412799069923))
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 85, 'roulette': 21}
+Crossover Strategies: {'one_point': 1, 'uniform': 85, 'subtree': 21}
+Mutation Strategies: {'simple': 1, 'creep': 85, 'diversity': 21}
+Local Search Algorithms: {'hill_climb': 68, 'best_subtree_replacement': 46}
+
+2025-01-20 12:25:31,215 - Processing Problem 3
+2025-01-20 12:25:31,217 - Initializing Genetic Programming.
+2025-01-20 12:25:31,297 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,314 - Generation 1/100 - Best Fitness: 2618.2494
+2025-01-20 12:25:31,359 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,371 - Generation 2/100 - Best Fitness: 2564.8414
+2025-01-20 12:25:31,405 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,415 - Generation 3/100 - Best Fitness: 1772.2389
+2025-01-20 12:25:31,452 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,458 - Generation 4/100 - Best Fitness: 1772.2389
+2025-01-20 12:25:31,474 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,482 - Generation 5/100 - Best Fitness: 1772.2389
+2025-01-20 12:25:31,503 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,510 - Generation 6/100 - Best Fitness: 1772.2389
+2025-01-20 12:25:31,657 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,666 - Generation 7/100 - Best Fitness: 1772.2389
+2025-01-20 12:25:31,838 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,847 - Generation 8/100 - Best Fitness: 1772.2389
+2025-01-20 12:25:31,870 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,878 - Generation 9/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:31,904 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,911 - Generation 10/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:31,931 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,940 - Generation 11/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:31,965 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:31,973 - Generation 12/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:32,114 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:32,124 - Generation 13/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:32,331 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:32,340 - Generation 14/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:32,538 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:32,547 - Generation 15/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:32,731 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:32,742 - Generation 16/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:32,978 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:32,987 - Generation 17/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:33,190 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:33,201 - Generation 18/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:33,411 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:33,419 - Generation 19/100 - Best Fitness: 1762.1381
+2025-01-20 12:25:33,422 - Early stopping triggered at generation 20: Best Fitness = 1762.1381, Generations Without Improvement = 10
+2025-01-20 12:25:33,723 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:31
+Experiment finished at 2025-01-20 12:25:33
+Duration: 2.51 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.1413 (Low)
+Final Complexity: 5.4200 (Medium)
+Total Generations: 19
+Generations Without Improvement: 10 (52.6%)
+Best Fitness Achieved: 1762.1381 (Bad)
+Best Expression: np.negative(np.log2(np.log2(x[1])))
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 12, 'roulette': 10}
+Crossover Strategies: {'one_point': 1, 'uniform': 12, 'subtree': 10}
+Mutation Strategies: {'simple': 1, 'creep': 12, 'diversity': 10}
+Local Search Algorithms: {'hill_climb': 1, 'best_subtree_replacement': 19}
+
+2025-01-20 12:25:33,724 - Processing Problem 4
+2025-01-20 12:25:33,725 - Initializing Genetic Programming.
+2025-01-20 12:25:33,799 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:33,813 - Generation 1/100 - Best Fitness: 20.5922
+2025-01-20 12:25:33,849 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:33,857 - Generation 2/100 - Best Fitness: 20.5922
+2025-01-20 12:25:33,883 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:33,892 - Generation 3/100 - Best Fitness: 20.5922
+2025-01-20 12:25:33,917 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:33,924 - Generation 4/100 - Best Fitness: 20.5922
+2025-01-20 12:25:34,059 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,070 - Generation 5/100 - Best Fitness: 20.5922
+2025-01-20 12:25:34,274 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,285 - Generation 6/100 - Best Fitness: 20.5922
+2025-01-20 12:25:34,314 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,324 - Generation 7/100 - Best Fitness: 19.6827
+2025-01-20 12:25:34,346 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,355 - Generation 8/100 - Best Fitness: 19.6827
+2025-01-20 12:25:34,376 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,387 - Generation 9/100 - Best Fitness: 13.7151
+2025-01-20 12:25:34,418 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,428 - Generation 10/100 - Best Fitness: 13.7151
+2025-01-20 12:25:34,454 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,464 - Generation 11/100 - Best Fitness: 13.7151
+2025-01-20 12:25:34,492 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,502 - Generation 12/100 - Best Fitness: 13.7151
+2025-01-20 12:25:34,691 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,699 - Generation 13/100 - Best Fitness: 13.7151
+2025-01-20 12:25:34,872 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,882 - Generation 14/100 - Best Fitness: 13.7151
+2025-01-20 12:25:34,907 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,918 - Generation 15/100 - Best Fitness: 9.4295
+2025-01-20 12:25:34,945 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,955 - Generation 16/100 - Best Fitness: 9.4295
+2025-01-20 12:25:34,984 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:34,995 - Generation 17/100 - Best Fitness: 9.4295
+2025-01-20 12:25:35,025 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:35,036 - Generation 18/100 - Best Fitness: 9.4295
+2025-01-20 12:25:35,261 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:35,273 - Generation 19/100 - Best Fitness: 9.4295
+2025-01-20 12:25:35,509 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:35,521 - Generation 20/100 - Best Fitness: 9.4295
+2025-01-20 12:25:35,768 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:35,781 - Generation 21/100 - Best Fitness: 9.4295
+2025-01-20 12:25:36,041 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:36,053 - Generation 22/100 - Best Fitness: 9.4295
+2025-01-20 12:25:36,276 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:36,289 - Generation 23/100 - Best Fitness: 9.4295
+2025-01-20 12:25:36,518 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:36,527 - Generation 24/100 - Best Fitness: 9.4295
+2025-01-20 12:25:36,709 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:36,719 - Generation 25/100 - Best Fitness: 9.4295
+2025-01-20 12:25:36,723 - Early stopping triggered at generation 26: Best Fitness = 9.4295, Generations Without Improvement = 10
+2025-01-20 12:25:37,022 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:33
+Experiment finished at 2025-01-20 12:25:37
+Duration: 3.30 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.1414 (Low)
+Final Complexity: 6.4600 (Medium)
+Total Generations: 25
+Generations Without Improvement: 10 (40.0%)
+Best Fitness Achieved: 9.4295 (Bad)
+Best Expression: np.exp(np.exp(np.cos(np.abs(x[1]))))
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 17, 'roulette': 13}
+Crossover Strategies: {'one_point': 1, 'uniform': 17, 'subtree': 13}
+Mutation Strategies: {'simple': 1, 'creep': 17, 'diversity': 13}
+Local Search Algorithms: {'hill_climb': 1, 'best_subtree_replacement': 25}
+
+2025-01-20 12:25:37,023 - Processing Problem 5
+2025-01-20 12:25:37,024 - Initializing Genetic Programming.
+2025-01-20 12:25:37,035 - Early stopping triggered at generation 1: Best Fitness = 0.0040, Generations Without Improvement = 0
+2025-01-20 12:25:37,295 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:37
+Experiment finished at 2025-01-20 12:25:37
+Duration: 0.27 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.0000 (Low)
+Final Complexity: 0.0000 (Low)
+Total Generations: 0
+Generations Without Improvement: 0 (0.0%)
+Best Fitness Achieved: inf (Bad)
+Best Expression: np.multiply(np.multiply(np.multiply(np.sin(np.cos(x[1])), np.abs(np.negative(-0.601))), np.tan(np.log2(np.sin(0.128)))), np.sin(np.maximum(np.subtract(np.log(-0.784), np.log10(0.816)), np.divide(np.abs(0.661), np.abs(-0.397)))))
+
+--- Strategy Usage ---
+Selection Strategies: {}
+Crossover Strategies: {}
+Mutation Strategies: {}
+Local Search Algorithms: {}
+
+2025-01-20 12:25:37,296 - Processing Problem 6
+2025-01-20 12:25:37,297 - Initializing Genetic Programming.
+2025-01-20 12:25:37,371 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,381 - Generation 1/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,411 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,418 - Generation 2/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,446 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,452 - Generation 3/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,471 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,477 - Generation 4/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,605 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,610 - Generation 5/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,737 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,743 - Generation 6/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,861 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,867 - Generation 7/100 - Best Fitness: 8.2689
+2025-01-20 12:25:37,883 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,888 - Generation 8/100 - Best Fitness: 2.5492
+2025-01-20 12:25:37,901 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,907 - Generation 9/100 - Best Fitness: 2.5492
+2025-01-20 12:25:37,923 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,930 - Generation 10/100 - Best Fitness: 2.5492
+2025-01-20 12:25:37,957 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:37,965 - Generation 11/100 - Best Fitness: 2.5492
+2025-01-20 12:25:38,102 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:38,108 - Generation 12/100 - Best Fitness: 2.5492
+2025-01-20 12:25:38,267 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:38,273 - Generation 13/100 - Best Fitness: 2.5492
+2025-01-20 12:25:38,395 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:38,405 - Generation 14/100 - Best Fitness: 2.5492
+2025-01-20 12:25:38,590 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:38,599 - Generation 15/100 - Best Fitness: 2.5492
+2025-01-20 12:25:38,774 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:38,784 - Generation 16/100 - Best Fitness: 2.5492
+2025-01-20 12:25:38,990 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:38,997 - Generation 17/100 - Best Fitness: 2.5492
+2025-01-20 12:25:39,159 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,168 - Generation 18/100 - Best Fitness: 2.5492
+2025-01-20 12:25:39,172 - Early stopping triggered at generation 19: Best Fitness = 2.5492, Generations Without Improvement = 10
+2025-01-20 12:25:39,481 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:37
+Experiment finished at 2025-01-20 12:25:39
+Duration: 2.18 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.1433 (Low)
+Final Complexity: 4.8800 (Low)
+Total Generations: 18
+Generations Without Improvement: 10 (55.6%)
+Best Fitness Achieved: 2.5492 (Bad)
+Best Expression: np.subtract(x[1], np.abs(x[0]))
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 10, 'roulette': 11}
+Crossover Strategies: {'one_point': 1, 'uniform': 10, 'subtree': 11}
+Mutation Strategies: {'simple': 1, 'creep': 10, 'diversity': 11}
+Local Search Algorithms: {'hill_climb': 1, 'best_subtree_replacement': 18}
+
+2025-01-20 12:25:39,482 - Processing Problem 7
+2025-01-20 12:25:39,483 - Initializing Genetic Programming.
+2025-01-20 12:25:39,554 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,568 - Generation 1/100 - Best Fitness: 758.9986
+2025-01-20 12:25:39,607 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,619 - Generation 2/100 - Best Fitness: 758.9986
+2025-01-20 12:25:39,648 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,661 - Generation 3/100 - Best Fitness: 711.2087
+2025-01-20 12:25:39,695 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,707 - Generation 4/100 - Best Fitness: 711.2087
+2025-01-20 12:25:39,742 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,757 - Generation 5/100 - Best Fitness: 711.2087
+2025-01-20 12:25:39,791 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,799 - Generation 6/100 - Best Fitness: 711.2087
+2025-01-20 12:25:39,968 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:39,978 - Generation 7/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,166 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:40,174 - Generation 8/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,289 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:40,296 - Generation 9/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,438 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:40,447 - Generation 10/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,605 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:40,614 - Generation 11/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,789 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:40,798 - Generation 12/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,963 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:40,970 - Generation 13/100 - Best Fitness: 711.2087
+2025-01-20 12:25:40,973 - Early stopping triggered at generation 14: Best Fitness = 688.3378, Generations Without Improvement = 10
+2025-01-20 12:25:41,270 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:39
+Experiment finished at 2025-01-20 12:25:41
+Duration: 1.79 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.1400 (Low)
+Final Complexity: 4.6800 (Low)
+Total Generations: 13
+Generations Without Improvement: 10 (76.9%)
+Best Fitness Achieved: 711.2087 (Bad)
+Best Expression: np.add(np.abs(np.multiply(np.negative(np.minimum(x[1], x[1])), np.log10(-0.912))), np.sqrt(np.negative(np.log10(-0.875))))
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 7, 'roulette': 7}
+Crossover Strategies: {'one_point': 1, 'uniform': 7, 'subtree': 7}
+Mutation Strategies: {'simple': 1, 'creep': 7, 'diversity': 7}
+Local Search Algorithms: {'hill_climb': 1, 'best_subtree_replacement': 13}
+
+2025-01-20 12:25:41,271 - Processing Problem 8
+2025-01-20 12:25:41,276 - Initializing Genetic Programming.
+2025-01-20 12:25:41,992 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:42,096 - Generation 1/100 - Best Fitness: 22960101.4502
+2025-01-20 12:25:42,366 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:42,454 - Generation 2/100 - Best Fitness: 22960101.4502
+2025-01-20 12:25:42,675 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:42,762 - Generation 3/100 - Best Fitness: 22907979.4146
+2025-01-20 12:25:42,971 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:43,065 - Generation 4/100 - Best Fitness: 22907979.4146
+2025-01-20 12:25:43,286 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:43,425 - Generation 5/100 - Best Fitness: 22907979.4146
+2025-01-20 12:25:43,735 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:43,894 - Generation 6/100 - Best Fitness: 22901804.9783
+2025-01-20 12:25:44,258 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:44,456 - Generation 7/100 - Best Fitness: 22875305.2773
+2025-01-20 12:25:44,868 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:45,127 - Generation 8/100 - Best Fitness: 22875305.2773
+2025-01-20 12:25:45,713 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:45,972 - Generation 9/100 - Best Fitness: 22811498.2669
+2025-01-20 12:25:46,583 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:46,807 - Generation 10/100 - Best Fitness: 22811498.2669
+2025-01-20 12:25:47,344 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:47,524 - Generation 11/100 - Best Fitness: 22811496.1774
+2025-01-20 12:25:47,921 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:48,097 - Generation 12/100 - Best Fitness: 22701267.4010
+2025-01-20 12:25:48,451 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:48,629 - Generation 13/100 - Best Fitness: 22701265.4560
+2025-01-20 12:25:49,021 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:49,192 - Generation 14/100 - Best Fitness: 22701265.4560
+2025-01-20 12:25:49,553 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:49,716 - Generation 15/100 - Best Fitness: 22434114.5880
+2025-01-20 12:25:50,091 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:50,295 - Generation 16/100 - Best Fitness: 22434114.5880
+2025-01-20 12:25:50,760 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:50,960 - Generation 17/100 - Best Fitness: 22434114.5880
+2025-01-20 12:25:51,469 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:51,695 - Generation 18/100 - Best Fitness: 22384737.4164
+2025-01-20 12:25:52,273 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:52,496 - Generation 19/100 - Best Fitness: 21734291.4241
+2025-01-20 12:25:53,074 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:53,254 - Generation 20/100 - Best Fitness: 18775256.9978
+2025-01-20 12:25:53,709 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:53,911 - Generation 21/100 - Best Fitness: 18775256.9978
+2025-01-20 12:25:54,431 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:54,604 - Generation 22/100 - Best Fitness: 18775256.9978
+2025-01-20 12:25:55,078 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:55,288 - Generation 23/100 - Best Fitness: 18394186.6769
+2025-01-20 12:25:55,868 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:56,087 - Generation 24/100 - Best Fitness: 18394186.6769
+2025-01-20 12:25:56,646 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:56,874 - Generation 25/100 - Best Fitness: 18394148.9926
+2025-01-20 12:25:57,422 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:57,653 - Generation 26/100 - Best Fitness: 17469418.1584
+2025-01-20 12:25:58,229 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:58,455 - Generation 27/100 - Best Fitness: 17413176.9758
+2025-01-20 12:25:58,995 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:25:59,214 - Generation 28/100 - Best Fitness: 17413176.9758
+2025-01-20 12:25:59,785 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:00,030 - Generation 29/100 - Best Fitness: 17402602.0827
+2025-01-20 12:26:00,629 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:00,878 - Generation 30/100 - Best Fitness: 17397271.3554
+2025-01-20 12:26:01,534 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:01,793 - Generation 31/100 - Best Fitness: 17397271.3554
+2025-01-20 12:26:02,416 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:02,631 - Generation 32/100 - Best Fitness: 17397271.3554
+2025-01-20 12:26:03,136 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:03,331 - Generation 33/100 - Best Fitness: 17169812.8456
+2025-01-20 12:26:03,812 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:04,020 - Generation 34/100 - Best Fitness: 17169614.7797
+2025-01-20 12:26:04,550 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:04,839 - Generation 35/100 - Best Fitness: 17169586.2792
+2025-01-20 12:26:05,601 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:05,875 - Generation 36/100 - Best Fitness: 17156510.1601
+2025-01-20 12:26:06,620 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:06,841 - Generation 37/100 - Best Fitness: 16592521.8417
+2025-01-20 12:26:07,384 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:07,623 - Generation 38/100 - Best Fitness: 16592521.8417
+2025-01-20 12:26:08,231 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:08,469 - Generation 39/100 - Best Fitness: 16514361.9924
+2025-01-20 12:26:09,046 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:09,310 - Generation 40/100 - Best Fitness: 16514361.9924
+2025-01-20 12:26:09,990 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:10,236 - Generation 41/100 - Best Fitness: 16514351.9970
+2025-01-20 12:26:10,851 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:11,081 - Generation 42/100 - Best Fitness: 16514321.2313
+2025-01-20 12:26:11,642 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:11,876 - Generation 43/100 - Best Fitness: 16514299.6631
+2025-01-20 12:26:12,469 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:12,703 - Generation 44/100 - Best Fitness: 16514201.7397
+2025-01-20 12:26:13,283 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:13,545 - Generation 45/100 - Best Fitness: 16502327.8216
+2025-01-20 12:26:14,198 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:14,460 - Generation 46/100 - Best Fitness: 16488272.4878
+2025-01-20 12:26:15,147 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:15,416 - Generation 47/100 - Best Fitness: 16488272.4878
+2025-01-20 12:26:16,107 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:16,355 - Generation 48/100 - Best Fitness: 16464443.5010
+2025-01-20 12:26:16,977 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:17,235 - Generation 49/100 - Best Fitness: 16464443.5010
+2025-01-20 12:26:17,882 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:18,135 - Generation 50/100 - Best Fitness: 16464297.5048
+2025-01-20 12:26:18,802 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:19,077 - Generation 51/100 - Best Fitness: 16443665.1436
+2025-01-20 12:26:19,798 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:20,058 - Generation 52/100 - Best Fitness: 16412222.8219
+2025-01-20 12:26:20,727 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:20,987 - Generation 53/100 - Best Fitness: 16412222.8219
+2025-01-20 12:26:21,671 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:21,923 - Generation 54/100 - Best Fitness: 16402540.7231
+2025-01-20 12:26:22,568 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:22,788 - Generation 55/100 - Best Fitness: 16402457.4810
+2025-01-20 12:26:23,321 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:23,550 - Generation 56/100 - Best Fitness: 16402457.4810
+2025-01-20 12:26:24,108 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:24,359 - Generation 57/100 - Best Fitness: 16402457.4810
+2025-01-20 12:26:24,953 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:25,166 - Generation 58/100 - Best Fitness: 16402454.9941
+2025-01-20 12:26:25,696 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:25,924 - Generation 59/100 - Best Fitness: 16402430.8457
+2025-01-20 12:26:26,471 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:26,711 - Generation 60/100 - Best Fitness: 16402430.8457
+2025-01-20 12:26:27,335 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:27,564 - Generation 61/100 - Best Fitness: 16402430.8457
+2025-01-20 12:26:28,135 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:28,353 - Generation 62/100 - Best Fitness: 16359040.5772
+2025-01-20 12:26:28,892 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:29,155 - Generation 63/100 - Best Fitness: 16359040.5772
+2025-01-20 12:26:29,817 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:30,043 - Generation 64/100 - Best Fitness: 16359012.4029
+2025-01-20 12:26:30,615 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:30,870 - Generation 65/100 - Best Fitness: 16358994.8912
+2025-01-20 12:26:31,528 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:31,784 - Generation 66/100 - Best Fitness: 16358992.6098
+2025-01-20 12:26:32,421 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:32,631 - Generation 67/100 - Best Fitness: 16358992.3417
+2025-01-20 12:26:33,164 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:33,379 - Generation 68/100 - Best Fitness: 16358966.9683
+2025-01-20 12:26:33,960 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:34,199 - Generation 69/100 - Best Fitness: 16358883.3258
+2025-01-20 12:26:34,833 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:35,079 - Generation 70/100 - Best Fitness: 16355841.6677
+2025-01-20 12:26:35,725 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:35,961 - Generation 71/100 - Best Fitness: 16355841.6677
+2025-01-20 12:26:36,578 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:36,834 - Generation 72/100 - Best Fitness: 16349334.1556
+2025-01-20 12:26:37,513 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:37,766 - Generation 73/100 - Best Fitness: 16325329.9817
+2025-01-20 12:26:38,433 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:38,676 - Generation 74/100 - Best Fitness: 16325329.9817
+2025-01-20 12:26:39,310 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:39,570 - Generation 75/100 - Best Fitness: 14498453.7454
+2025-01-20 12:26:40,241 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:40,456 - Generation 76/100 - Best Fitness: 14498453.7454
+2025-01-20 12:26:40,992 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:41,238 - Generation 77/100 - Best Fitness: 14497681.1338
+2025-01-20 12:26:41,825 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:42,017 - Generation 78/100 - Best Fitness: 14490868.6764
+2025-01-20 12:26:42,450 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:42,661 - Generation 79/100 - Best Fitness: 13952276.9771
+2025-01-20 12:26:43,200 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:43,430 - Generation 80/100 - Best Fitness: 13873364.5888
+2025-01-20 12:26:44,019 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:44,229 - Generation 81/100 - Best Fitness: 13873364.5888
+2025-01-20 12:26:44,763 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:44,962 - Generation 82/100 - Best Fitness: 13681086.4448
+2025-01-20 12:26:45,457 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:45,686 - Generation 83/100 - Best Fitness: 13681086.4448
+2025-01-20 12:26:46,277 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:46,482 - Generation 84/100 - Best Fitness: 13681085.0543
+2025-01-20 12:26:46,971 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:47,223 - Generation 85/100 - Best Fitness: 13681074.4213
+2025-01-20 12:26:47,794 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:48,010 - Generation 86/100 - Best Fitness: 13680996.1181
+2025-01-20 12:26:48,522 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:48,782 - Generation 87/100 - Best Fitness: 13680188.3868
+2025-01-20 12:26:49,437 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:49,707 - Generation 88/100 - Best Fitness: 13680188.3868
+2025-01-20 12:26:50,336 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:50,590 - Generation 89/100 - Best Fitness: 13680188.3868
+2025-01-20 12:26:51,211 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:51,496 - Generation 90/100 - Best Fitness: 13680188.3417
+2025-01-20 12:26:52,177 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:52,494 - Generation 91/100 - Best Fitness: 13680187.7802
+2025-01-20 12:26:53,297 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:53,619 - Generation 92/100 - Best Fitness: 13679975.0197
+2025-01-20 12:26:54,418 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:54,748 - Generation 93/100 - Best Fitness: 13679922.7919
+2025-01-20 12:26:55,565 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:55,897 - Generation 94/100 - Best Fitness: 13679899.1052
+2025-01-20 12:26:56,757 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:57,068 - Generation 95/100 - Best Fitness: 13679899.1052
+2025-01-20 12:26:57,892 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:58,203 - Generation 96/100 - Best Fitness: 13679899.1052
+2025-01-20 12:26:59,008 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:26:59,333 - Generation 97/100 - Best Fitness: 13679882.6406
+2025-01-20 12:27:00,176 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:27:00,509 - Generation 98/100 - Best Fitness: 13679772.7846
+2025-01-20 12:27:01,425 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:27:01,716 - Generation 99/100 - Best Fitness: 13679772.7846
+2025-01-20 12:27:02,400 - Diversity injection: 20 individuals reinitialized.
+2025-01-20 12:27:02,677 - Generation 100/100 - Best Fitness: 13679772.7846
+2025-01-20 12:27:03,024 - 
+==================== Experiment Summary ====================
+--- Experiment Configuration ---
+Population Size: 50
+Max Depth: 5
+Max Generations: 100
+Mutation Rate: 0.6
+Crossover Rate: 0.9
+Elitism: 5
+
+--- Experiment Status ---
+Experiment started at 2025-01-20 12:25:41
+Experiment finished at 2025-01-20 12:27:03
+Duration: 81.75 seconds
+Status: Succeeded
+Reason: Max generations reached
+
+--- Experiment Statistics ---
+Final Diversity: 0.4913 (Low)
+Final Complexity: 17.7000 (High)
+Total Generations: 100
+Generations Without Improvement: 2 (2.0%)
+Best Fitness Achieved: 13679772.7846 (Bad)
+Best Expression: np.multiply(np.exp(np.maximum(x[5], x[5])), np.sqrt(np.add(np.add(np.maximum(x[5], -0.32779955076614836), np.add(np.add(np.power(-0.42364272880678455, -0.38899758675289664), np.maximum(x[0], 0.8469980488836968)), np.cos(0.6369281746720699))), np.power(np.power(0.1310521723541805, -0.39922070111161384), np.abs(x[3])))))
+
+--- Strategy Usage ---
+Selection Strategies: {'elitist': 1, 'tournament': 100}
+Crossover Strategies: {'one_point': 1, 'uniform': 100}
+Mutation Strategies: {'simple': 1, 'creep': 100}
+Local Search Algorithms: {'hill_climb': 94, 'best_subtree_replacement': 14}
+

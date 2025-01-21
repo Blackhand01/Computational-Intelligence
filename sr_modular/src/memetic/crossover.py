@@ -111,15 +111,17 @@ class AdaptiveCrossoverManager:
         new_strategy = old_strategy  # Mantiene la strategia corrente come predefinita
         reason = "Strategia predefinita (one_point)"
 
-        if self.statistics.complexity > 10:
-            new_strategy = "blended"
-            reason = "Alta complessità (>10)"
-        elif self.statistics.diversity < 5:
-            new_strategy = "uniform"
-            reason = "Bassa diversità (<5)"
-        elif self.statistics.generations_no_improvement > 5:
+        
+        if self.statistics.generations_no_improvement > 3:
             new_strategy = "subtree"
             reason = "Stagnazione rilevata"
+        elif self.statistics.diversity < 0.5:
+            new_strategy = "uniform"
+            reason = "Bassa diversità (<0.5)"
+        elif self.statistics.complexity >20:
+            new_strategy = "blended"
+            reason = "Alta complessità (>20)"
+        
 
         self.statistics.update_single_strategy(
             strategy_type="crossover",
