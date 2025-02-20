@@ -1,6 +1,6 @@
 # Ignora l'ambiente virtuale
 laboratory/labenv/
-theory/
+
 # Ignora i file markdown dei report
 docs/report.md
 
@@ -27,10 +27,4 @@ __pycache__/
 .DS_Store
 # Ignora i file di configurazione ambiente
 .env
-symbolic_regression
-symbolic_regression_2
-rl-sr
-sr_test
-sr_modular/data
-sr_modular/scripts
-sr_modular/experiments/
+

@@ -1,0 +1,161 @@
+Julia Sartre, [14 gen 2025, 17:44:28]:
+Dear professor @squillero, 
+Just to be sure about the exam and the format, I am not sure that I have fully understood 😅
+We have to submit a report, and the code one week before the exam (the code also one week before right?). How long should the report approximately be? What are the expectations in this regard?
+And for the exam we will get general questions about the class and our project work, is this it? 
+In addition, the labs are eventual bonus points for the grades that we will get? 
+I am really sorry if these questions seem obvious, I just wanted to be sure to avoid any misunderstandings
+
+
+Giovanni Squillero, [14 gen 2025, 21:24:00]:
+The report, also called by me "log", is a loosely formatted report about your activity during the year: labs, reviews, project work.
+
+
+Grades for the project work will be given according to the report (not the "format" of the report, but the ideas described in the report)
+
+
+Grades for the labs will be given according to the report AND our recor
+
+
+(ds)
+
+
+The "practical" question in the final exam is to check that you are the author of the code. Its on/off, where off means means that you failed the exam and you need to present a new project work
+
+
+and on means no points 😉
+
+
+Milad, [14 gen 2025, 21:27:53]:
+Hello Professor, could you please confirm if submitting the report and symbolic regression project one week prior to the second call is acceptable for taking the exam during that session?
+
+
+Giovanni Squillero, [14 gen 2025, 21:28:18]:
++ booking
+
+
+booking is required in each session
+
+I kindly ask you to RESUBMIT the report if you attend multiple session. Just the same, but it will easo auro work
+
+
+Sorry, but it is needed to allocate rooms
+
+
+A, [14 gen 2025, 22:08:32]:
+Hello Professor. Sorry for the inconvenience, but I would like to be sure about it. If we realize the project work in group, all the group members must take the exam during the same call ...
+
+Giovanni Squillero, [12 dic 2024, 18:24:42]:
+hello I have a question about the project,but if the data has noise we have to find a formula that overfits the data (so as to minimize mse) or should we try to eliminate the noise first and then obtain the function?
+
+
+because if i minimize mse as much as possible i will surely have overfitting. Is the evaluation done looking at mse only?
+
+
+Why do you think there is noise?
+
+
+Your goal is to be as correct as possible (in term of MSE) with the unseen 50% of the data
+
+
+Nick, [12 dic 2024, 23:52:50]:
+I say that I think there is noise because in a couple I have a very high fitness that struggles to decrease, unlike all the others where it drops immediately. So I tried to make some plots on some sections and it seems to me that there is added noise on a basic function.
+However, even in this case my goal is to minimize MSE (therefore overfitting) so I shouldn't worry even if there was, right?
+
+
+Giuseppe Esposito, [13 dic 2024, 07:52:34]:
+You shouldn't worry that much about overfitting imho, but if you want to make sure that everything Is ok there are some techniques from classical machine learning that might help the generalization capabilities of the final formulas. Try to look them Up 😉
+
+
+Natalia Lebedeva, [17 dic 2024, 17:30:04]:
+Can you remind please if the github repo for the project should follow some specific naming rule?
+
+student => s + YourID + py
+
+
+I'm d3584.py
+
+
+Let's talk about the project works on Wednesdays' labs
+
+
+(tomorrow)
+
+
+I don't need data
+
+
+Andrea, [20 dic 2024, 11:24:03 (20 dic 2024, 12:37:48)]:
+dear @squillero , i prepared my alg. in order to solve the project. but, somethimes my alg. finds formuals like: "add(-4.482786261803932, -9.244371208909083)". as you can see, this formula doesn't have any variables. it is okay, or it should always have a variable? In this case, i got good mse: Training MSE: 0.049289794072790216
+Validation MSE: 0.05037240604422409
+
+
+Giorgio Bongiovanni, [20 dic 2024, 12:32:29]:
+Good morning Professor, would it be possible to have ranges of MSE values to understand whether the results we obtained are excellent, good or mediocre?
+
+
+Giovanni Squillero, [23 dic 2024, 11:13:04]:
+Nope
+
+Nick, [24 dic 2024, 15:12:39]:
+Good afternoon professor, for the file if we were multiple people working on it, should we have a file for each student or should we use just one? if one which student_id should be used?
+
+
+Giovanni Squillero, [25 dic 2024, 16:48:08]:
+From the "official" course description, available since September: "Students are encouraged to work in teams, but for the purposes of the exam, each student will be individually responsible for the entire assignment"
+
+
+Each student is individually fully responsible for every minute detail of the project work.
+
+
+Students provide their own sXXXX.py files
+
+
+Students write in the private relation their opinion about the team work.
+Dan, [28 dic 2024, 17:34:37]:
+Hello professor @squillero, sorry for the stupid question. I am running the project together with a colleague and we are working on the same repository. From what I understand it is necessary for each one to have a repo with the name CI2024_project-work on their github, is this correct?
+In this case, is it a problem if one of the two of us after the project is finished, clone the code from the shared repo to a personal repo before delivery? Or is it possible to deliver only one repo for both of us?
+
+
+In this case one of us won't have any push/commits in the repo
+
+
+Giovanni Squillero, [28 dic 2024, 17:54:27 (28 dic 2024, 17:54:52)]:
+Yes. Each student presents one personal result in a personal, but public, repo.
+
+
+Cloning someone else's repo should be clearly motivated in the report (sent privately to the instructors)
+
+
+In your case the explanation sounds plausible.
+
+
+Yes, but you have the pushes in the other repo...
+
+
+Worst case, we (@GiuseppeEsposito98 and I) shall run a double check (oral) just for you.
+
+
+Remember: You don't get a vote from this check, it's just a go/no-go.
+
+
+Dan, [28 dic 2024, 18:22:24]:
+All clear, thanks! I have another question though.
+
+From what I'm reading here, the results file needs to be named s+YourID+.py but in case my colleague and I share the repository, do we need to name it with both of our IDs (like s1234_s5678.py)? or do we upload two identical solutions, one for each ID?
+
+
+Giovanni Squillero, [28 dic 2024, 18:27:59]:
+Repeat
+Each student presents ONE individual work.
+
+
+Similarities and exchange of information will be punished UNLESS candidly declared on the INDIVIDUAL report (eg. "I worked in a team with Bob s12345 and we copied THIS routine from Alice on Stack Overflow...)
+
+
+Dan, [28 dic 2024, 18:34:09]:
+Ok thanks again for the clarification!
+
+
+Loiodice Lukas, [15 gen 2025, 11:22:02]:
+Good morning professors, I have a question about the project, is it an issue if we have errors due to invalid function entries in the test set? I can obviously manage my trees to avoid invalid values in the training set, but since I can't update my tree on the test set, I imagine that errors may happen on this set
