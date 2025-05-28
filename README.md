@@ -1,8 +1,6 @@
 # Symbolic Regression - Modular Framework
 
 **Author:** Stefano Roy Bisignano
-**GitHub:** [@StefanoRoyBisignano](#)
-**Year:** 2024-2025
 
 ---
 
