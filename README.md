@@ -26,7 +26,7 @@ The main goal is to generate interpretable mathematical formulas by optimizing t
 
 The system is designed for a wide range of applications, including:
 
-![Application Domains]![image](https://github.com/user-attachments/assets/0101f2be-3d51-4ea1-9acc-4de7e5fa0af6)
+![Application Domains](https://github.com/user-attachments/assets/0101f2be-3d51-4ea1-9acc-4de7e5fa0af6)
 
 ---
 
